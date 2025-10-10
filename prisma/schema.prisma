@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../lib/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id            String    @id @default(cuid())
+    // 基础信息
+    username      String    @unique // 用户名（唯一，用于 @username）
+    email         String?   @unique // 邮箱
+    emailVerified DateTime? // 邮箱验证时间
+    phoneNumber   String?   @unique // 手机号
+    phoneVerified DateTime? // 手机验证时间
+    password      String? // 密码（使用第三方登录时可能为空）
+
+    // 个人资料
+    name       String? // 显示名称/昵称
+    bio        String? // 个人简介
+    image      String? // 头像 URL
+    coverImage String? // 封面图片 URL
+    location   String? // 地理位置
+    website    String? // 个人网站
+    birthDate  DateTime? // 出生日期
+
+    // 社交特性
+    verified  Boolean @default(false) // 认证标记（蓝V）
+    protected Boolean @default(false) // 受保护账号（推文需要审批才能查看）
+
+    // 统计数据（冗余字段，提高查询性能）
+    followersCount Int @default(0) // 粉丝数
+    followingCount Int @default(0) // 关注数
+    postsCount     Int @default(0) // 推文数
+    likesCount     Int @default(0) // 点赞数
+
+    // 时间戳
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // 关系
+    accounts Account[] // 第三方账号（Google、Github 等）
+    sessions Session[] // 会话
+
+    @@index([username])
+    @@index([email])
+    @@index([phoneNumber])
+    @@index([createdAt])
+    @@map("users")
+}
+
+// 第三方登录账号表（NextAuth）
+model Account {
+    id                String  @id @default(cuid())
+    userId            String  @map("user_id")
+    type              String // oauth, email 等
+    provider          String // google, github 等
+    providerAccountId String  @map("provider_account_id")
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+    @@index([userId])
+    @@map("accounts")
+}
+
+// 会话表（NextAuth）
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique @map("session_token")
+    userId       String   @map("user_id")
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@map("sessions")
+}
