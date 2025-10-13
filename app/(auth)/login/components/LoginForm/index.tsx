@@ -24,6 +24,7 @@ export function LoginForm() {
             <span className="text-black">或</span>
             <div className="flex-1 border-t border-gray-300"></div>
         </div>
+        {/* 创建账号 */}
         <CreateAccount />
         <div className="my-10 text-[11px]" style={{ color: 'rgb(83, 100, 113)' }}>
             注册即表示同意<span style={{ color: 'rgb(29, 155, 240)', cursor: 'pointer' }}>服务条款</span>及<span style={{ color: 'rgb(29, 155, 240)', cursor: 'pointer' }}>隐私政策</span>，其中包括<span style={{ color: 'rgb(29, 155, 240)', cursor: 'pointer' }}> Cookie 使用条款</span>。

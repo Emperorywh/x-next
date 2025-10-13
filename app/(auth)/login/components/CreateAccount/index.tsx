@@ -32,18 +32,16 @@ import { z } from "zod";
 import { zhCN } from "date-fns/locale";
 import { LogoIcon } from "@/components/templates";
 
-const getFormSchema = (showPhone: boolean) => {
-    return z.object({
-        nickName: z.string().min(2, { message: "昵称至少要两位字符" }),
-        phoneNumber: showPhone
-            ? z.string().min(1, { message: "手机号必填" })
-            : z.string().optional(),
-        email: !showPhone
-            ? z.string().email({ message: "邮箱格式错误" })
-            : z.string().optional(),
-        birthday: z.date({ error: "生日是必填项" }),
-    });
-};
+const FormSchema = z.object({
+    username: z.string().min(6, { message: "用户名至少要6位字符" }),
+    phoneNumber: z.string().optional().refine(
+        (val) => !val || /^1[3-9]\d{9}$/.test(val),
+        { message: "请输入正确的手机号格式" }
+    ),
+    email: z.string().email({ message: "邮箱格式错误" }),
+    code: z.string().regex(/^\d{6}$/, "验证码必须是6位数字"),
+    birthday: z.date({ error: "生日是必填项" })
+})
 
 
 export function CreateAccount() {
@@ -51,15 +49,13 @@ export function CreateAccount() {
 
     const [open, setOpen] = useState(false);
 
-    const [showPhone, setShowPhone] = useState(true); // true 显示手机，false 显示邮箱
-
     const form = useForm({
-        resolver: zodResolver(getFormSchema(showPhone)),
-        defaultValues: { nickName: "", phoneNumber: "", email: "", birthday: undefined },
+        resolver: zodResolver(FormSchema),
+        defaultValues: { username: "", phoneNumber: "", email: "", birthday: undefined, code: '' },
     });
 
 
-    function onSubmit(data: z.infer<ReturnType<typeof getFormSchema>>) {
+    function onSubmit(data: z.infer<typeof FormSchema>) {
         console.log("提交数据:", data);
         setOpen(false);
     }
@@ -82,67 +78,98 @@ export function CreateAccount() {
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
-                        {/* 昵称 */}
+                        {/* 用户名 */}
                         <FormField
                             control={form.control}
-                            name="nickName"
+                            name="username"
                             render={({ field }) => (
                                 <FormItem className="mb-5">
-                                    <FormLabel className="mb-1 font-medium">昵称</FormLabel>
+                                    <FormLabel className="mb-1 font-medium">用户名</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="请输入昵称" {...field} />
+                                        <Input
+                                            placeholder="请输入用户名"
+                                            {...field}
+                                            onBlur={async () => {
+                                                await form.trigger("username");
+                                            }}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-
-                        {/* 手机或邮箱切换 */}
-                        {showPhone ? (
-                            <FormField
-                                control={form.control}
-                                name="phoneNumber"
-                                render={({ field }) => (
-                                    <FormItem className="mb-5">
-                                        <FormLabel className="mb-1 font-medium">手机</FormLabel>
+                        <FormField
+                            control={form.control}
+                            name="phoneNumber"
+                            render={({ field }) => (
+                                <FormItem className="mb-5">
+                                    <FormLabel className="mb-1 font-medium">手机</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="请输入手机号"
+                                            {...field}
+                                            onBlur={async () => {
+                                                await form.trigger("phoneNumber");
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem className="mb-5">
+                                    <FormLabel className="mb-1 font-medium">邮箱</FormLabel>
+                                    <div className="flex gap-2">
                                         <FormControl>
-                                            <Input placeholder="请输入手机号" {...field} />
+                                            <Input
+                                                placeholder="请输入邮箱"
+                                                {...field}
+                                                onBlur={async () => {
+                                                    await form.trigger("email");
+                                                }}
+                                            />
                                         </FormControl>
-                                        <FormMessage />
                                         <Button
-                                            variant="link"
                                             type="button"
-                                            className="cursor-pointer text-sky-500"
-                                            onClick={() => setShowPhone(false)}
+                                            variant="outline"
+                                            onClick={async () => {
+                                                // 触发邮箱字段的校验
+                                                const isValid = await form.trigger("email");
+                                                if (isValid) {
+                                                    console.log("邮箱格式正确，可以发送验证码");
+                                                }
+                                            }}
                                         >
-                                            切换邮箱
+                                            获取验证码
                                         </Button>
-                                    </FormItem>
-                                )}
-                            />
-                        ) : (
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem className="mb-5">
-                                        <FormLabel className="mb-1 font-medium">邮箱</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="请输入邮箱" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                        <Button
-                                            variant="link"
-                                            type="button"
-                                            className="cursor-pointer text-sky-500"
-                                            onClick={() => setShowPhone(true)}
-                                        >
-                                            切换手机
-                                        </Button>
-                                    </FormItem>
-                                )}
-                            />
-                        )}
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="code"
+                            render={({ field }) => (
+                                <FormItem className="mb-5">
+                                    <FormLabel className="mb-1 font-medium">验证码</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="请输入验证码"
+                                            {...field}
+                                            onBlur={async () => {
+                                                await form.trigger("code");
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
                         {/* 出生日期 */}
                         <FormField
