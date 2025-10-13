@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: x-next-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-xnext}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - x-next-network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: x-next-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis123}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - x-next-network
+
+  # Next.js应用
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: x-next-app
+    restart: unless-stopped
+    environment:
+      # 数据库配置
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-xnext}
+      
+      # Redis配置
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      REDIS_DB: 0
+      
+      # 邮件配置
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_APP_PASSWORD: ${EMAIL_APP_PASSWORD}
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST:-smtp.gmail.com}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT:-587}
+      
+      # Next.js配置
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+    ports:
+      - "3334:3334"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - x-next-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  x-next-network:
+    driver: bridge
