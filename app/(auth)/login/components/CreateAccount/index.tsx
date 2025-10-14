@@ -31,33 +31,131 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zhCN } from "date-fns/locale";
 import { LogoIcon } from "@/components/templates";
+import { SendVerificationCodeRequest } from "@/lib/http/services/email/types";
+import { sendVerificationCodeApi } from "@/lib/http/services/email";
+import { RegisterRequest } from "@/lib/http/services/auth/types";
+import { registerApi } from "@/lib/http/services/auth";
 
 const FormSchema = z.object({
-    username: z.string().min(6, { message: "用户名至少要6位字符" }),
+    username: z
+        .string()
+        .min(3, "用户名至少需要3个字符")
+        .max(20, "用户名不能超过20个字符")
+        .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
     phoneNumber: z.string().optional().refine(
         (val) => !val || /^1[3-9]\d{9}$/.test(val),
         { message: "请输入正确的手机号格式" }
     ),
     email: z.string().email({ message: "邮箱格式错误" }),
-    code: z.string().regex(/^\d{6}$/, "验证码必须是6位数字"),
-    birthday: z.date({ error: "生日是必填项" })
+    code: z.string().length(6, "验证码必须是6位数字"),
+    birthday: z.date({ error: "生日是必填项" }),
+    password: z
+        .string()
+        .min(8, "密码至少需要8个字符")
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "密码必须包含大小写字母和数字"),
+    confirmPassword: z
+        .string()
+        .min(8, "密码至少需要8个字符")
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "密码必须包含大小写字母和数字"),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "两次密码不一致",
+    path: ["confirmPassword"],
 })
 
 
 export function CreateAccount() {
-
-
     const [open, setOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSendingCode, setIsSendingCode] = useState(false);
+    const [codeSent, setCodeSent] = useState(false);
+    const [countdown, setCountdown] = useState(0);
 
     const form = useForm({
         resolver: zodResolver(FormSchema),
-        defaultValues: { username: "", phoneNumber: "", email: "", birthday: undefined, code: '' },
+        defaultValues: { username: "", phoneNumber: "", email: "", birthday: undefined, code: '', password: '', confirmPassword: '' },
     });
 
+    // 发送验证码
+    const sendVerificationCode = async (email: string) => {
+        setIsSendingCode(true);
+        try {
+            const requestData: SendVerificationCodeRequest = { email };
+            const response = await sendVerificationCodeApi(requestData);
+            
+            if (response.success) {
+                setCodeSent(true);
+                setCountdown(600);
+                // 开始倒计时
+                const timer = setInterval(() => {
+                    setCountdown((prev) => {
+                        if (prev <= 1) {
+                            clearInterval(timer);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+            } else {
+                const errorMessage = typeof response.error === 'string' 
+                    ? response.error 
+                    : '发送验证码失败';
+                form.setError('email', { message: errorMessage });
+            }
+        } catch (error: any) {
+            form.setError('email', { message: error.message || '发送验证码失败' });
+        } finally {
+            setIsSendingCode(false);
+        }
+    };
+
+    // 注册用户
+    const registerUser = async (data: z.infer<typeof FormSchema>) => {
+        setIsLoading(true);
+        try {
+            // 转换数据格式以匹配后端 API
+            const registerData: RegisterRequest = {
+                username: data.username,
+                email: data.email,
+                phoneNumber: data.phoneNumber || undefined,
+                password: data.password,
+                birthDate: data.birthday.toISOString(),
+                code: data.code,
+            };
+
+            const response = await registerApi(registerData);
+
+            if (response.success) {
+                // 注册成功
+                console.log('注册成功:', response.data);
+                setOpen(false);
+                form.reset();
+                // 这里可以添加成功提示或跳转逻辑
+                alert('注册成功！');
+            } else {
+                // 处理错误
+                if (response.error && typeof response.error === 'object') {
+                    // Zod 验证错误
+                    const errorObj = response.error as Record<string, any>;
+                    Object.keys(errorObj).forEach((field) => {
+                        form.setError(field as any, { message: errorObj[field] });
+                    });
+                } else {
+                    // 其他错误
+                    const errorMessage = typeof response.error === 'string' 
+                        ? response.error 
+                        : '注册失败';
+                    form.setError('root', { message: errorMessage });
+                }
+            }
+        } catch (error: any) {
+            form.setError('root', { message: error.message || '注册失败' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        console.log("提交数据:", data);
-        setOpen(false);
+        registerUser(data);
     }
 
     useEffect(() => {
@@ -136,15 +234,16 @@ export function CreateAccount() {
                                         <Button
                                             type="button"
                                             variant="outline"
+                                            disabled={isSendingCode || countdown > 0}
                                             onClick={async () => {
                                                 // 触发邮箱字段的校验
                                                 const isValid = await form.trigger("email");
                                                 if (isValid) {
-                                                    console.log("邮箱格式正确，可以发送验证码");
+                                                    await sendVerificationCode(field.value);
                                                 }
                                             }}
                                         >
-                                            获取验证码
+                                            {isSendingCode ? '发送中...' : countdown > 0 ? `${countdown}s后重试` : '获取验证码'}
                                         </Button>
                                     </div>
                                     <FormMessage />
@@ -163,6 +262,44 @@ export function CreateAccount() {
                                             {...field}
                                             onBlur={async () => {
                                                 await form.trigger("code");
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem className="mb-5">
+                                    <FormLabel className="mb-1 font-medium">密码</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="请输入密码"
+                                            {...field}
+                                            onBlur={async () => {
+                                                await form.trigger("password");
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                                <FormItem className="mb-5">
+                                    <FormLabel className="mb-1 font-medium">确认密码</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="请再次输入密码"
+                                            {...field}
+                                            onBlur={async () => {
+                                                await form.trigger("confirmPassword");
                                             }}
                                         />
                                     </FormControl>
@@ -217,11 +354,20 @@ export function CreateAccount() {
                             )}
                         />
 
+                        {/* 显示全局错误信息 */}
+                        {form.formState.errors.root && (
+                            <div className="text-red-500 text-sm mb-4">
+                                {form.formState.errors.root.message}
+                            </div>
+                        )}
+
                         <DialogFooter className="mt-5">
                             <DialogClose asChild>
-                                <Button variant="outline">取消</Button>
+                                <Button variant="outline" disabled={isLoading}>取消</Button>
                             </DialogClose>
-                            <Button type="submit">确定</Button>
+                            <Button type="submit" disabled={isLoading}>
+                                {isLoading ? '注册中...' : '确定'}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>

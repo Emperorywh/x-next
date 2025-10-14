@@ -1,9 +1,15 @@
 import EnvironmentConfig from "@/lib/config/env";
 import { VerificationCodeService } from "@/lib/redis";
 import { extractZodErrors } from "@/lib/utils";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import * as nodemailer from 'nodemailer';
 import { z } from "zod";
+import {
+    successResponse,
+    errorResponse,
+    serverErrorResponse,
+    responses
+} from '@/lib/api-response';
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -106,15 +112,11 @@ export async function POST(request: NextRequest) {
         const { email, type } = SendCodeSchema.parse(body);
         const cooldownStatus = await VerificationCodeService.isInCooldown(email);
         if (cooldownStatus.inCooldown) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: `请等待 ${cooldownStatus.remainingTime} 秒后再试`
-                },
-                {
-                    status: 429
-                }
-            )
+            return errorResponse({
+                error: `请等待 ${cooldownStatus.remainingTime} 秒后再试`,
+                message: `请等待 ${cooldownStatus.remainingTime} 秒后再试`,
+                status: 429
+            });
         }
 
         // 生成验证码
@@ -124,55 +126,42 @@ export async function POST(request: NextRequest) {
         await VerificationCodeService.storeCode(email, code, type);
 
         // 创建邮件发送器
-        const transporter = createTransporter();
+        // const transporter = createTransporter();
 
-        const emailContent = createEmailTemplate(code, type);
+        // const emailContent = createEmailTemplate(code, type);
 
-        // 邮件配置
-        const emailConfig = EnvironmentConfig.emailConfig;
+        // // 邮件配置
+        // const emailConfig = EnvironmentConfig.emailConfig;
 
-        await transporter.sendMail({
-            from: `邮件通知 <${emailConfig.user}>`,
-            to: email,
-            subject: emailContent.subject,
-            html: emailContent.html,
-            text: emailContent.text
-        });
+        // await transporter.sendMail({
+        //     from: `邮件通知 <${emailConfig.user}>`,
+        //     to: email,
+        //     subject: emailContent.subject,
+        //     html: emailContent.html,
+        //     text: emailContent.text
+        // });
 
         await VerificationCodeService.setCooldown(email);
 
-        return NextResponse.json(
-            {
-                success: true,
+        return successResponse({
+            data: {
                 message: '验证码已发送到您的邮箱',
                 expiresIn: 600
-            }
-        )
+            },
+            message: '验证码已发送到您的邮箱',
+            status: 200
+        });
 
     } catch (error) {
         console.error('发送验证码API错误:', error);
         if (error instanceof z.ZodError) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: '请求参数错误',
-                    errors: extractZodErrors(error)
-                },
-                {
-                    status: 400
-                }
-            )
+            return errorResponse({
+                error: extractZodErrors(error),
+                message: '请求参数错误',
+                status: 400
+            });
         }
-        return NextResponse.json(
-            {
-                success: false,
-                message: '发送失败，请稍后重试',
-                errors: error
-            },
-            {
-                status: 500
-            }
-        )
+        return serverErrorResponse('发送失败，请稍后重试');
     }
 }
 
@@ -190,46 +179,28 @@ export async function PUT(request: NextRequest) {
 
         const result = await VerificationCodeService.verifyCode(email, code);
         if (result.success) {
-            return Response.json(
-                {
-                    success: true,
-                    message: result.message
-                }
-            )
+            await VerificationCodeService.delColldown(email);
+            return successResponse({
+                data: { message: result.message },
+                message: result.message,
+                status: 200
+            });
         } else {
-            return Response.json(
-                {
-                    success: false,
-                    message: result.message
-                },
-                {
-                    status: 400
-                }
-            )
+            return errorResponse({
+                error: result.message,
+                message: result.message,
+                status: 400
+            });
         }
     } catch (error) {
 
         if (error instanceof z.ZodError) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: '请求参数错误',
-                    errors: extractZodErrors(error)
-                },
-                {
-                    status: 400
-                }
-            )
-        }
-        return NextResponse.json(
-            {
-                success: false,
-                message: '验证失败，请稍后重试',
-                errors: error
-            },
-            {
+            return errorResponse({
+                error: extractZodErrors(error),
+                message: '请求参数错误',
                 status: 400
-            }
-        )
+            });
+        }
+        return serverErrorResponse('验证失败，请稍后重试');
     }
 }

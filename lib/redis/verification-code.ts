@@ -131,6 +131,16 @@ export class VerificationCodeService {
 	}
 
 	/**
+	 * 删除冷却期
+	 * @param email 
+	 * @returns 
+	 */
+	static async delColldown(email: string) {
+		const cooldownKey = `cooldown:${email}`;
+		return await redisService.del(cooldownKey);
+	}
+
+	/**
 	 * 获取验证码剩余时间 
 	 * @param email 
 	 * @returns 
