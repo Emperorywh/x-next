@@ -2,16 +2,30 @@
  * 认证模块 - 类型定义
  */
 
+import { ResponseData } from "../../client";
+
 export interface User {
 	id: string;
 	username: string;
-	name: string;
 	email: string;
-	phoneNumber?: string;
-	avatar?: string;
+	emailVerified: Date | null;
+	phoneNumber: string;
+	phoneVerified: Date | null;
+	name: string | null;
+	bio: string | null;
+	image: string | null;
+	coverImage: string | null;
+	location: string | null;
+	website: string | null;
+	birthDate: Date;
 	verified: boolean;
-	createdAt: string;
-	updatedAt: string;
+	protected: boolean;
+	followersCount: number;
+	followingCount: number;
+	postsCount: number;
+	likesCount: number;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
@@ -30,7 +44,21 @@ export interface RegisterRequest {
 /**
  * 注册响应
  */
-export interface RegisterResponse {
-	user: User;
-	message: string;
+export interface RegisterResponse extends ResponseData<User> {
+	
+}
+
+
+/**
+ * 用户登录请求
+ */
+export interface LoginRequest {
+	username?: string;
+	email?: string;
+	phoneNumber?: string;
+	password: string;
+}
+
+export interface LoginResponse extends ResponseData<User> {
+
 }

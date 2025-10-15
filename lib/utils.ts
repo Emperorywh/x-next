@@ -52,6 +52,16 @@ export function extractZodErrors(error: ZodError): {
  * 加密密码
  */
 export async function hashPassword(password: string): Promise<string> {
-	const SALT_ROUNDS = 12
+	const SALT_ROUNDS = 12;
 	return bcrypt.hash(password, SALT_ROUNDS)
+}
+
+/**
+ * 验证密码
+ * @param password 用户输入的明文密码
+ * @param hashedPassword 数据库中存储的加密密码
+ * @returns Promise<boolean> 密码是否正确
+ */
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+	return bcrypt.compare(password, hashedPassword);
 }

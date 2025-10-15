@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CreateAccount } from "../CreateAccount";
+import { DialogLogin } from "../DialogLogin";
 
 export function LoginForm() {
     return <div className="flex flex-col">
@@ -33,9 +34,7 @@ export function LoginForm() {
             <div className="text-3xl font-bold my-5">
                 <span>已有账号？</span>
             </div>
-            <Button variant="outline" className="my-5 font-bold rounded-full w-[300] h-[40] cursor-pointer ">
-                登录
-            </Button>
+            <DialogLogin />
         </div>
     </div>
 }
