@@ -4,11 +4,7 @@ import { registerSchema } from '@/lib/validations/auth'
 import { ZodError } from 'zod'
 import { extractZodErrors, formatLocalDateTime, hashPassword } from '@/lib/utils'
 import { VerificationCodeService } from '@/lib/redis'
-import {
-	successResponse,
-	errorResponse,
-	serverErrorResponse,
-} from '@/lib/api-response'
+import { NextResponseJson } from '@/lib/api-response'
 
 export async function POST(request: NextRequest) {
 	try {
@@ -31,24 +27,26 @@ export async function POST(request: NextRequest) {
 
 		if (existingUser) {
 			if (existingUser.username === validatedData.username) {
-				return errorResponse({ error: '用户名已被使用', message: '用户名已被使用', status: 400 })
+				return NextResponseJson({ data: null, message: '用户名已被使用', success: false })
 			}
 			if (existingUser.email === validatedData.email) {
-				return errorResponse({ error: '邮箱已被注册', message: '邮箱已被注册', status: 400 })
+				return NextResponseJson({ data: null, message: '邮箱已被注册', success: false })
 			}
 			if (existingUser.phoneNumber === validatedData.phoneNumber) {
-				return errorResponse({ error: '手机号已被注册', message: '手机号已被注册', status: 400 })
+				return NextResponseJson({ data: null, message: '手机号已被注册', success: false })
 			}
 		}
 
 		const codeResult = await VerificationCodeService.verifyCode(validatedData.email, validatedData.code);
 
 		if (!codeResult.success) {
-			return errorResponse({ error: codeResult.message, message: codeResult.message, status: 400 })
+			return NextResponseJson({ data: null, message: codeResult.message, success: false })
 		}
 
 		// 加密密码
-		const hashedPassword = await hashPassword(validatedData.password)
+		const hashedPassword = await hashPassword(validatedData.password);
+
+		console.log("hashedPassword:", hashedPassword)
 
 		// 创建用户
 		const user = await prisma.user.create({
@@ -79,7 +77,7 @@ export async function POST(request: NextRequest) {
 		})
 
 		// 返回成功响应
-		return successResponse({
+		return NextResponseJson({
 			data: {
 				user: {
 					id: user.id,
@@ -93,6 +91,7 @@ export async function POST(request: NextRequest) {
 				}
 			},
 			message: '注册成功',
+			success: true,
 			status: 201
 		})
 
@@ -100,13 +99,12 @@ export async function POST(request: NextRequest) {
 
 		// 处理 Zod 验证错误
 		if (error instanceof ZodError) {
-			console.error('注册错误:', error.issues)
 			const errorInfo = extractZodErrors(error)
-			return errorResponse({ error: errorInfo.errors, message: '数据验证失败', status: 400 })
+			return NextResponseJson({ data: null, message: '数据验证失败', success: false, error: errorInfo.errors })
 		}
 
 		// 其他错误
 		console.error('注册错误:', error)
-		return serverErrorResponse('注册失败')
+		return NextResponseJson({ data: null, message: '注册失败', success: false, status: 500 })
 	}
 }

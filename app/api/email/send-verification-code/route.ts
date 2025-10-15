@@ -4,12 +4,7 @@ import { extractZodErrors } from "@/lib/utils";
 import { NextRequest } from "next/server";
 import * as nodemailer from 'nodemailer';
 import { z } from "zod";
-import {
-    successResponse,
-    errorResponse,
-    serverErrorResponse,
-    responses
-} from '@/lib/api-response';
+import { NextResponseJson } from '@/lib/api-response';
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -112,10 +107,11 @@ export async function POST(request: NextRequest) {
         const { email, type } = SendCodeSchema.parse(body);
         const cooldownStatus = await VerificationCodeService.isInCooldown(email);
         if (cooldownStatus.inCooldown) {
-            return errorResponse({
-                error: `请等待 ${cooldownStatus.remainingTime} 秒后再试`,
+            return NextResponseJson({
+                data: null,
                 message: `请等待 ${cooldownStatus.remainingTime} 秒后再试`,
-                status: 429
+                success: false,
+                status: 200
             });
         }
 
@@ -143,25 +139,32 @@ export async function POST(request: NextRequest) {
 
         await VerificationCodeService.setCooldown(email);
 
-        return successResponse({
+        return NextResponseJson({
             data: {
                 message: '验证码已发送到您的邮箱',
                 expiresIn: 600
             },
             message: '验证码已发送到您的邮箱',
+            success: true,
             status: 200
         });
 
     } catch (error) {
-        console.error('发送验证码API错误:', error);
         if (error instanceof z.ZodError) {
-            return errorResponse({
-                error: extractZodErrors(error),
+            return NextResponseJson({
+                data: null,
                 message: '请求参数错误',
+                success: false,
+                error: extractZodErrors(error),
                 status: 400
             });
         }
-        return serverErrorResponse('发送失败，请稍后重试');
+        return NextResponseJson({
+            data: null,
+            message: '发送失败，请稍后重试',
+            success: false,
+            status: 500
+        });
     }
 }
 
@@ -180,27 +183,37 @@ export async function PUT(request: NextRequest) {
         const result = await VerificationCodeService.verifyCode(email, code);
         if (result.success) {
             await VerificationCodeService.delColldown(email);
-            return successResponse({
+            return NextResponseJson({
                 data: { message: result.message },
                 message: result.message,
+                success: true,
                 status: 200
             });
         } else {
-            return errorResponse({
-                error: result.message,
+            return NextResponseJson({
+                data: null,
                 message: result.message,
-                status: 400
+                success: false,
+                error: result.message,
+                status: 200
             });
         }
     } catch (error) {
 
         if (error instanceof z.ZodError) {
-            return errorResponse({
-                error: extractZodErrors(error),
+            return NextResponseJson({
+                data: null,
                 message: '请求参数错误',
+                success: false,
+                error: extractZodErrors(error),
                 status: 400
             });
         }
-        return serverErrorResponse('验证失败，请稍后重试');
+        return NextResponseJson({
+            data: null,
+            message: '验证失败，请稍后重试',
+            success: false,
+            status: 500
+        });
     }
 }

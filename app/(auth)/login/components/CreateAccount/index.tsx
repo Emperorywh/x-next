@@ -35,6 +35,7 @@ import { SendVerificationCodeRequest } from "@/lib/http/services/email/types";
 import { sendVerificationCodeApi } from "@/lib/http/services/email";
 import { RegisterRequest } from "@/lib/http/services/auth/types";
 import { registerApi } from "@/lib/http/services/auth";
+import { toast } from "sonner"
 
 const FormSchema = z.object({
     username: z
@@ -68,7 +69,6 @@ export function CreateAccount() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSendingCode, setIsSendingCode] = useState(false);
     const [codeSent, setCodeSent] = useState(false);
-    const [countdown, setCountdown] = useState(0);
 
     const form = useForm({
         resolver: zodResolver(FormSchema),
@@ -81,25 +81,11 @@ export function CreateAccount() {
         try {
             const requestData: SendVerificationCodeRequest = { email };
             const response = await sendVerificationCodeApi(requestData);
-            
             if (response.success) {
                 setCodeSent(true);
-                setCountdown(600);
-                // 开始倒计时
-                const timer = setInterval(() => {
-                    setCountdown((prev) => {
-                        if (prev <= 1) {
-                            clearInterval(timer);
-                            return 0;
-                        }
-                        return prev - 1;
-                    });
-                }, 1000);
+                toast.success(response?.message);
             } else {
-                const errorMessage = typeof response.error === 'string' 
-                    ? response.error 
-                    : '发送验证码失败';
-                form.setError('email', { message: errorMessage });
+                toast.error(response?.message);
             }
         } catch (error: any) {
             form.setError('email', { message: error.message || '发送验证码失败' });
@@ -125,27 +111,10 @@ export function CreateAccount() {
             const response = await registerApi(registerData);
 
             if (response.success) {
-                // 注册成功
-                console.log('注册成功:', response.data);
                 setOpen(false);
-                form.reset();
-                // 这里可以添加成功提示或跳转逻辑
-                alert('注册成功！');
+                toast.success("注册成功");
             } else {
-                // 处理错误
-                if (response.error && typeof response.error === 'object') {
-                    // Zod 验证错误
-                    const errorObj = response.error as Record<string, any>;
-                    Object.keys(errorObj).forEach((field) => {
-                        form.setError(field as any, { message: errorObj[field] });
-                    });
-                } else {
-                    // 其他错误
-                    const errorMessage = typeof response.error === 'string' 
-                        ? response.error 
-                        : '注册失败';
-                    form.setError('root', { message: errorMessage });
-                }
+                toast.error(response?.message);
             }
         } catch (error: any) {
             form.setError('root', { message: error.message || '注册失败' });
@@ -158,8 +127,18 @@ export function CreateAccount() {
         registerUser(data);
     }
 
+    /**
+     * 初始化
+     */
+    function resetStatus() {
+        form.reset();
+        setCodeSent(false);
+        setIsLoading(false);
+        setIsSendingCode(false);
+    }
+
     useEffect(() => {
-        if (!open) form.reset();
+        resetStatus();
     }, [open]);
 
     return (
@@ -234,7 +213,7 @@ export function CreateAccount() {
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            disabled={isSendingCode || countdown > 0}
+                                            disabled={isSendingCode || codeSent}
                                             onClick={async () => {
                                                 // 触发邮箱字段的校验
                                                 const isValid = await form.trigger("email");
@@ -243,7 +222,7 @@ export function CreateAccount() {
                                                 }
                                             }}
                                         >
-                                            {isSendingCode ? '发送中...' : countdown > 0 ? `${countdown}s后重试` : '获取验证码'}
+                                            {isSendingCode ? '发送中...' : '获取验证码'}
                                         </Button>
                                     </div>
                                     <FormMessage />

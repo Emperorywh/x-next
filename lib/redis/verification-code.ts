@@ -83,6 +83,7 @@ export class VerificationCodeService {
 			}
 		}
 		this.deleteCode(email);
+		this.delColldown(email);
 		return {
 			success: true,
 			message: '验证成功'
