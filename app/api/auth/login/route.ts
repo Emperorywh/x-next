@@ -1,6 +1,7 @@
 import { NextResponseJson } from "@/lib/api-response";
+import { TokenService } from "@/lib/auth/authTokenService";
 import { prisma } from "@/lib/prisma";
-import { extractZodErrors, hashPassword, verifyPassword } from "@/lib/utils";
+import { extractZodErrors, verifyPassword } from "@/lib/utils";
 import { loginSchema } from "@/lib/validations/auth";
 import { NextRequest } from "next/server";
 import z from "zod";
@@ -40,8 +41,16 @@ export async function POST(request: NextRequest) {
         }
         return NextResponseJson({
             data: {
-                ...existingUser,
-                password: undefined
+                user: {
+                    ...existingUser,
+                    password: undefined
+                },
+                token: await TokenService.generateAccessToken({
+                    userId: existingUser.id
+                }),
+                refreshToken: await TokenService.generateRefreshToken({
+                    userId: existingUser.id
+                })
             },
             message: "登录成功",
             success: true

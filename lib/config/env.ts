@@ -19,6 +19,18 @@ interface EnvironmentVariables {
     EMAIL_APP_PASSWORD: string;
     EMAIL_SMTP_HOST: string;
     EMAIL_SMTP_PORT: string;
+
+    /**
+     * Token相关
+     */
+    ACCESS_TOKEN_SECRET: string;
+    REFRESH_TOKEN_SECRET: string;
+
+    /**
+     * 项目名称
+     */
+    APP_NAME: string;
+
 }
 
 
@@ -70,6 +82,23 @@ class EnvironmentConfig {
             host: this.validateEnvVar('EMAIL_SMTP_HOST'),
             port: this.validateEnvVar('EMAIL_SMTP_PORT'),
         }
+    }
+
+    /**
+     * 获取token相关的配置
+     */
+    static get tokenConfig() {
+        return {
+            accessTokenSecret: this.validateEnvVar('ACCESS_TOKEN_SECRET'),
+            refreshTokenSecret: this.validateEnvVar('REFRESH_TOKEN_SECRET')
+        }
+    }
+
+    /**
+     * 项目名称
+     */
+    static get appName() {
+        return this.validateEnvVar('APP_NAME') || '';
     }
 }
 
