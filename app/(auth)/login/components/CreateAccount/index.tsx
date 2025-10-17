@@ -30,12 +30,12 @@ import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zhCN } from "date-fns/locale";
-import { LogoIcon } from "@/components/templates";
 import { SendVerificationCodeRequest } from "@/lib/http/services/email/types";
 import { sendVerificationCodeApi } from "@/lib/http/services/email";
 import { RegisterRequest } from "@/lib/http/services/auth/types";
 import { registerApi } from "@/lib/http/services/auth";
 import { toast } from "sonner"
+import { IconX } from "@/components/features/Icon";
 
 const FormSchema = z.object({
     username: z
@@ -149,7 +149,7 @@ export function CreateAccount() {
 
             <DialogContent className="w-[500px] p-10">
                 <DialogHeader className="grid grid-flow-col items-center mb-5">
-                    <LogoIcon width={38} height={38} className="col-span-1" />
+                    <IconX width={38} height={38} className="col-span-1" />
                     <DialogTitle className="col-span-2">创建你的账号</DialogTitle>
                 </DialogHeader>
 

@@ -1,15 +1,15 @@
-import { IconBookMarks, IconCommunitity, IconGork, IconHome, IconList, IconMessage, IconMore, IconNotification, IconPersonal, IconPost, IconSearch, IconX } from "@/components/features/icon";
+import { IconBookMarks, IconCommunitity, IconGork, IconHome, IconList, IconMessage, IconMore, IconNotification, IconPersonal, IconPost, IconSearch, IconX } from "@/components/features/Icon";
 
 export default function NavigationBar() {
-    return <div className="flex-[0.45] flex justify-end ">
+    return <div className="flex-[0.45] shrink-0 flex justify-end ">
         <div className="w-[275px] box-border px-4 py-4">
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="inline-flex items-center p-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconX />
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconHome />
                     <span className="text-[16px] font-medium">
                         主页
@@ -17,7 +17,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconSearch />
                     <span>
                         探索
@@ -25,7 +25,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconNotification />
                     <span>
                         通知
@@ -33,7 +33,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconMessage />
                     <span>
                         私信
@@ -41,7 +41,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconGork />
                     <span>
                         Grok
@@ -49,7 +49,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconList />
                     <span>
                         列表
@@ -57,7 +57,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconBookMarks />
                     <span>
                         书签
@@ -65,7 +65,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconCommunitity />
                     <span>
                         社群
@@ -73,7 +73,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconPersonal />
                     <span>
                         个人资料
@@ -81,7 +81,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconMore />
                     <span>
                         更多
@@ -89,7 +89,7 @@ export default function NavigationBar() {
                 </div>
             </div>
             <div className="w-[245px] cursor-pointer">
-                <div className="w-[166px] h-[50px] flex items-center pl-5  gap-5 hover:bg-gray-200 rounded-full">
+                <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconPost />
                     <span>
                         发帖
