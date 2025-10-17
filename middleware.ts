@@ -8,7 +8,7 @@ import { TokenService } from "./lib/auth/authTokenService";
 export async function middleware(request: NextRequest) {
     const authorization = request.headers.get('authorization');
 
-    const publicRoutes = ['/', '/login'];
+    const publicRoutes = ['/', '/login', '/home'];
     if (publicRoutes.includes(request.nextUrl.pathname)) {
         return NextResponse.next()
     }
