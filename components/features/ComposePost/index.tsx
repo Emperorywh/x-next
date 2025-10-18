@@ -2,14 +2,18 @@ import Image from 'next/image'
 import { ComposePostProps } from "./types";
 import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { AtSign, Check, ChevronDown, Earth, ImagePlay, ImagePlus, ShieldCheck, Smile, UserCheck } from 'lucide-react';
+import { AtSign, Check, ChevronDown, Earth, ImagePlus, ShieldCheck, Smile, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EmojiPickerCustomer } from '../EmojiPickerCustomer';
+import { useRef, useState } from 'react';
 
 
 /**
  * 撰写帖子
  */
 export function ComposePost(props: ComposePostProps) {
+    const [postContent, setPostContent] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     return <div className='flex'>
         <div className="mr-5 shrink-0">
             <Image
@@ -50,7 +54,10 @@ export function ComposePost(props: ComposePostProps) {
             <Textarea
                 placeholder="有什么新鲜事？"
                 className="leading-[28px] focus-visible:ring-0 focus-visible:ring-offset-0 focus:shadow-none shadow-none border-0 outline-none resize-none bg-transparent font-bold w-full"
-                rows={5}
+                rows={1}
+                value={postContent}
+                onChange={event => setPostContent(event.target.value)}
+                ref={textareaRef}
             />
             <Popover>
                 <PopoverTrigger asChild>
@@ -117,12 +124,25 @@ export function ComposePost(props: ComposePostProps) {
                     <div className="w-[40px] h-[40px] hover:bg-[#e8f5fd] rounded-full flex items-center justify-center cursor-pointer">
                         <ImagePlus width={20} height={20} style={{ color: '#1D9BF0' }} />
                     </div>
-                    <div className="w-[40px] h-[40px] hover:bg-[#e8f5fd] rounded-full flex items-center justify-center cursor-pointer">
-                        <ImagePlay width={20} height={20} style={{ color: '#1D9BF0' }} />
-                    </div>
-                    <div className="w-[40px] h-[40px] hover:bg-[#e8f5fd] rounded-full flex items-center justify-center cursor-pointer">
-                        <Smile width={20} height={20} style={{ color: '#1D9BF0' }} />
-                    </div>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <div className="w-[40px] h-[40px] hover:bg-[#e8f5fd] rounded-full flex items-center justify-center cursor-pointer">
+                                <Smile width={20} height={20} style={{ color: '#1D9BF0' }} />
+                            </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0 m-0">
+                            <EmojiPickerCustomer
+                                onEmojiClick={event => {
+                                    if (!textareaRef?.current) return;
+                                    const start = textareaRef.current.selectionStart;
+                                    const end = textareaRef.current.selectionEnd;
+                                    const newValue =
+                                        postContent.substring(0, start) + event.emoji + postContent.substring(end);
+                                    setPostContent(newValue)
+                                }}
+                            />
+                        </PopoverContent>
+                    </Popover>
                 </div>
                 <Button className="cursor-pointer">发帖</Button>
             </div>
