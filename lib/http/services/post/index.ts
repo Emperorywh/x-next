@@ -24,6 +24,7 @@ import type {
 	BookmarkPostResponse,
 	UnbookmarkPostRequest,
 	UnbookmarkPostResponse,
+	PostListData,
 } from './types';
 
 /**
@@ -41,7 +42,7 @@ export async function createPostApi(data: CreatePostRequest) {
  * @returns 帖子列表
  */
 export async function getPostListApi(data: PostListRequest) {
-	return httpClient.post<PostListResponse>('/api/post/list', data);
+	return httpClient.post<PostListData>('/api/post/list', data);
 }
 
 /**

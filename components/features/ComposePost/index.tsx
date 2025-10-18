@@ -14,6 +14,7 @@ import { createPostApi } from '@/lib/http/services/post';
  * 撰写帖子
  */
 export function ComposePost(props: ComposePostProps) {
+    const { onCreatePostSuccess } = props;
     const [postContent, setPostContent] = useState('');
     const [loading, setLoading] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -32,6 +33,7 @@ export function ComposePost(props: ComposePostProps) {
             if (response.success) {
                 toast.success('发帖成功');
                 setPostContent('');
+                onCreatePostSuccess?.();
             } else {
                 toast.error(response?.message || '发帖失败，请稍后重试');
             }
@@ -86,6 +88,12 @@ export function ComposePost(props: ComposePostProps) {
                 value={postContent}
                 onChange={event => setPostContent(event.target.value)}
                 ref={textareaRef}
+                wrap="hard"
+                style={{
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                }}
             />
             <Popover>
                 <PopoverTrigger asChild>
