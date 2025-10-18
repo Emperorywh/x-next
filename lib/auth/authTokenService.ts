@@ -3,9 +3,34 @@ import EnvironmentConfig from '../config/env'
 
 export class TokenService {
 
-    private static readonly ACCESS_TOKEN_SECRET: Uint8Array = new TextEncoder().encode(EnvironmentConfig.tokenConfig.accessTokenSecret as string);
-    private static readonly REFRESH_TOKEN_SECRET: Uint8Array = new TextEncoder().encode(EnvironmentConfig.tokenConfig.refreshTokenSecret as string);
-    private static readonly APP_NAME = EnvironmentConfig.appName as string;
+    // private static readonly ACCESS_TOKEN_SECRET: Uint8Array = new TextEncoder().encode(EnvironmentConfig.tokenConfig.accessTokenSecret as string);
+    // private static readonly REFRESH_TOKEN_SECRET: Uint8Array = new TextEncoder().encode(EnvironmentConfig.tokenConfig.refreshTokenSecret as string);
+    // private static readonly APP_NAME = EnvironmentConfig.appName as string;
+
+    // 确保密钥一致性 - 使用静态方法获取
+    private static getAccessTokenSecret(): Uint8Array {
+        const secret = EnvironmentConfig.tokenConfig.accessTokenSecret as string;
+        if (!secret) {
+            throw new Error('ACCESS_TOKEN_SECRET environment variable is not set');
+        }
+        return new TextEncoder().encode(secret);
+    }
+
+    private static getRefreshTokenSecret(): Uint8Array {
+        const secret = EnvironmentConfig.tokenConfig.refreshTokenSecret as string;
+        if (!secret) {
+            throw new Error('REFRESH_TOKEN_SECRET environment variable is not set');
+        }
+        return new TextEncoder().encode(secret);
+    }
+
+    private static getAppName(): string {
+        const appName = EnvironmentConfig.appName as string;
+        if (!appName) {
+            throw new Error('APP_NAME environment variable is not set');
+        }
+        return appName;
+    }
 
     /**
      * 生成访问令牌
@@ -16,9 +41,9 @@ export class TokenService {
             .setProtectedHeader({ alg: 'HS256' })
             .setIssuedAt()
             .setExpirationTime("1h")
-            .setIssuer(this.APP_NAME)
-            .setAudience(this.APP_NAME)
-            .sign(this.ACCESS_TOKEN_SECRET)
+            .setIssuer(this.getAppName())
+            .setAudience(this.getAppName())
+            .sign(this.getAccessTokenSecret())
     }
 
 
@@ -31,9 +56,9 @@ export class TokenService {
             .setProtectedHeader({ alg: 'HS256' })
             .setIssuedAt()
             .setExpirationTime("7d")
-            .setIssuer(this.APP_NAME)
-            .setAudience(this.APP_NAME)
-            .sign(this.REFRESH_TOKEN_SECRET)
+            .setIssuer(this.getAppName())
+            .setAudience(this.getAppName())
+            .sign(this.getRefreshTokenSecret())
     }
 
     /**
@@ -42,9 +67,9 @@ export class TokenService {
      */
     static async verifyAccessToken(token: string) {
         try {
-            const { payload } = await jwtVerify(token, this.ACCESS_TOKEN_SECRET, {
-                issuer: this.APP_NAME,
-                audience: this.APP_NAME,
+            const { payload } = await jwtVerify(token, this.getAccessTokenSecret(), {
+                issuer: this.getAppName(),
+                audience: this.getAppName(),
             });
             return payload;
         } catch {
@@ -58,9 +83,9 @@ export class TokenService {
      */
     static async verifyRefreshToken(token: string) {
         try {
-            const { payload } = await jwtVerify(token, this.REFRESH_TOKEN_SECRET, {
-                issuer: this.APP_NAME,
-                audience: this.APP_NAME,
+            const { payload } = await jwtVerify(token, this.getRefreshTokenSecret(), {
+                issuer: this.getAppName(),
+                audience: this.getAppName(),
             });
             return payload;
         } catch {

@@ -133,6 +133,12 @@ class HttpClient {
 			async (config: InternalAxiosRequestConfig) => {
 				const customConfig = config as InternalAxiosRequestConfig & RequestConfig;
 
+				// token
+				const token = localStorage.getItem("TOKEN");
+				if (token) {
+					config.headers['Authorization'] = `Bearer ${token}`;
+				}
+
 				// 生成请求 ID
 				const requestId = this.generateRequestId();
 				config.headers['X-Request-ID'] = requestId;

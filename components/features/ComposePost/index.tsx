@@ -6,6 +6,8 @@ import { AtSign, Check, ChevronDown, Earth, ImagePlus, ShieldCheck, Smile, UserC
 import { Button } from '@/components/ui/button';
 import { EmojiPickerCustomer } from '../EmojiPickerCustomer';
 import { useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { createPostApi } from '@/lib/http/services/post';
 
 
 /**
@@ -13,7 +15,33 @@ import { useRef, useState } from 'react';
  */
 export function ComposePost(props: ComposePostProps) {
     const [postContent, setPostContent] = useState('');
+    const [loading, setLoading] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const handlePost = async () => {
+        try {
+            const value = textareaRef.current?.value;
+            if (!value) {
+                toast.error("请输入帖子内容");
+                return;
+            }
+            setLoading(true);
+            const response = await createPostApi({
+                content: value
+            });
+            if (response.success) {
+                toast.success('发帖成功');
+                setPostContent('');
+            } else {
+                toast.error(response?.message || '发帖失败，请稍后重试');
+            }
+        } catch (error) {
+            toast.error(JSON.stringify(error))
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return <div className='flex'>
         <div className="mr-5 shrink-0">
             <Image
@@ -144,7 +172,11 @@ export function ComposePost(props: ComposePostProps) {
                         </PopoverContent>
                     </Popover>
                 </div>
-                <Button className="cursor-pointer">发帖</Button>
+                <Button className="cursor-pointer" onClick={handlePost}>
+                    {
+                        loading ? '发贴中...' : '发帖'
+                    }
+                </Button>
             </div>
         </div>
     </div >
