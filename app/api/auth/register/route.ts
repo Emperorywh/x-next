@@ -46,8 +46,6 @@ export async function POST(request: NextRequest) {
 		// 加密密码
 		const hashedPassword = await hashPassword(validatedData.password);
 
-		console.log("hashedPassword:", hashedPassword)
-
 		// 创建用户
 		const user = await prisma.user.create({
 			data: {

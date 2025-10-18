@@ -3,6 +3,8 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// npx prisma migrate dev
+// npx prisma generate
 
 generator client {
     provider = "prisma-client-js"
@@ -47,9 +49,15 @@ model User {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    // 关系
-    accounts Account[] // 第三方账号（Google、Github 等）
-    sessions Session[] // 会话
+    // 关联关系
+    posts          Post[]          @relation("PostAuthor")
+    likes          PostLike[]      @relation("PostLikes")
+    retweets       PostRetweet[]   @relation("PostRetweets")
+    bookmarks      PostBookmark[]  @relation("PostBookmarks")
+    mentions       PostMention[]   @relation("PostMentions")
+    following      Follow[]        @relation("UserFollowing")
+    followers      Follow[]        @relation("UserFollowers")
+    hashtagFollows HashtagFollow[] @relation("HashtagFollowers")
 
     @@index([username])
     @@index([email])
@@ -58,36 +66,201 @@ model User {
     @@map("users")
 }
 
-// 第三方登录账号表（NextAuth）
-model Account {
-    id                String  @id @default(cuid())
-    userId            String  @map("user_id")
-    type              String // oauth, email 等
-    provider          String // google, github 等
-    providerAccountId String  @map("provider_account_id")
-    refresh_token     String? @db.Text
-    access_token      String? @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? @db.Text
-    session_state     String?
+// 推文/帖子模型
+model Post {
+    id         String  @id @default(cuid())
+    content    String // 推文内容
+    authorId   String // 作者ID
+    parentId   String? // 父推文ID（用于回复）
+    isRetweet  Boolean @default(false) // 是否为转发
+    originalId String? // 原始推文ID（转发时使用）
 
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    // 推文状态
+    isDeleted Boolean   @default(false) // 是否已删除
+    isEdited  Boolean   @default(false) // 是否已编辑
+    editedAt  DateTime? // 编辑时间
 
-    @@unique([provider, providerAccountId])
-    @@index([userId])
-    @@map("accounts")
+    // 统计数据（冗余字段，提高查询性能）
+    likesCount     Int @default(0) // 点赞数
+    retweetsCount  Int @default(0) // 转发数
+    repliesCount   Int @default(0) // 回复数
+    bookmarksCount Int @default(0) // 收藏数
+
+    // 时间戳
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // 关联关系
+    author      User           @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+    parent      Post?          @relation("PostReplies", fields: [parentId], references: [id])
+    replies     Post[]         @relation("PostReplies")
+    original    Post?          @relation("PostRetweets", fields: [originalId], references: [id])
+    retweetedBy Post[]         @relation("PostRetweets")
+    likes       PostLike[]     @relation("PostLikes")
+    retweets    PostRetweet[]  @relation("PostRetweets")
+    bookmarks   PostBookmark[] @relation("PostBookmarks")
+    media       PostMedia[]    @relation("PostMedia")
+    hashtags    PostHashtag[]  @relation("PostHashtags")
+    mentions    PostMention[]  @relation("PostMentions")
+
+    @@index([authorId])
+    @@index([parentId])
+    @@index([originalId])
+    @@index([createdAt])
+    @@index([isDeleted])
+    @@map("posts")
 }
 
-// 会话表（NextAuth）
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique @map("session_token")
-    userId       String   @map("user_id")
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+// 推文点赞模型
+model PostLike {
+    id        String   @id @default(cuid())
+    userId    String // 用户ID
+    postId    String // 推文ID
+    createdAt DateTime @default(now())
 
+    // 关联关系
+    user User @relation("PostLikes", fields: [userId], references: [id], onDelete: Cascade)
+    post Post @relation("PostLikes", fields: [postId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, postId])
     @@index([userId])
-    @@map("sessions")
+    @@index([postId])
+    @@map("post_likes")
+}
+
+// 推文转发模型
+model PostRetweet {
+    id        String   @id @default(cuid())
+    userId    String // 用户ID
+    postId    String // 推文ID
+    createdAt DateTime @default(now())
+
+    // 关联关系
+    user User @relation("PostRetweets", fields: [userId], references: [id], onDelete: Cascade)
+    post Post @relation("PostRetweets", fields: [postId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, postId])
+    @@index([userId])
+    @@index([postId])
+    @@map("post_retweets")
+}
+
+// 推文收藏模型
+model PostBookmark {
+    id        String   @id @default(cuid())
+    userId    String // 用户ID
+    postId    String // 推文ID
+    createdAt DateTime @default(now())
+
+    // 关联关系
+    user User @relation("PostBookmarks", fields: [userId], references: [id], onDelete: Cascade)
+    post Post @relation("PostBookmarks", fields: [postId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, postId])
+    @@index([userId])
+    @@index([postId])
+    @@map("post_bookmarks")
+}
+
+// 推文媒体附件模型
+model PostMedia {
+    id        String   @id @default(cuid())
+    postId    String // 推文ID
+    type      String // 媒体类型：image, video, gif
+    url       String // 媒体文件URL
+    altText   String? // 替代文本（无障碍访问）
+    width     Int? // 宽度
+    height    Int? // 高度
+    duration  Int? // 视频时长（秒）
+    createdAt DateTime @default(now())
+
+    // 关联关系
+    post Post @relation("PostMedia", fields: [postId], references: [id], onDelete: Cascade)
+
+    @@index([postId])
+    @@map("post_media")
+}
+
+// 话题标签模型
+model Hashtag {
+    id         String   @id @default(cuid())
+    name       String   @unique // 标签名称（不含#）
+    postsCount Int      @default(0) // 使用该标签的推文数
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    // 关联关系
+    posts   PostHashtag[]   @relation("HashtagPosts")
+    follows HashtagFollow[] @relation("HashtagFollows")
+
+    @@index([name])
+    @@map("hashtags")
+}
+
+// 推文话题标签关联模型
+model PostHashtag {
+    id        String   @id @default(cuid())
+    postId    String // 推文ID
+    hashtagId String // 标签ID
+    createdAt DateTime @default(now())
+
+    // 关联关系
+    post    Post    @relation("PostHashtags", fields: [postId], references: [id], onDelete: Cascade)
+    hashtag Hashtag @relation("HashtagPosts", fields: [hashtagId], references: [id], onDelete: Cascade)
+
+    @@unique([postId, hashtagId])
+    @@index([postId])
+    @@index([hashtagId])
+    @@map("post_hashtags")
+}
+
+// 推文@提及模型
+model PostMention {
+    id        String   @id @default(cuid())
+    postId    String // 推文ID
+    userId    String // 被提及的用户ID
+    createdAt DateTime @default(now())
+
+    // 关联关系
+    post Post @relation("PostMentions", fields: [postId], references: [id], onDelete: Cascade)
+    user User @relation("PostMentions", fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([postId, userId])
+    @@index([postId])
+    @@index([userId])
+    @@map("post_mentions")
+}
+
+// 用户关注关系模型
+model Follow {
+    id          String   @id @default(cuid())
+    followerId  String // 关注者ID
+    followingId String // 被关注者ID
+    createdAt   DateTime @default(now())
+
+    // 关联关系
+    follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+    following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+    @@unique([followerId, followingId])
+    @@index([followerId])
+    @@index([followingId])
+    @@map("follows")
+}
+
+// 话题标签关注模型
+model HashtagFollow {
+    id        String   @id @default(cuid())
+    userId    String // 用户ID
+    hashtagId String // 标签ID
+    createdAt DateTime @default(now())
+
+    // 关联关系
+    user    User    @relation("HashtagFollowers", fields: [userId], references: [id], onDelete: Cascade)
+    hashtag Hashtag @relation("HashtagFollows", fields: [hashtagId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, hashtagId])
+    @@index([userId])
+    @@index([hashtagId])
+    @@map("hashtag_follows")
 }

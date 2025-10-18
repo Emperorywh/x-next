@@ -15,7 +15,7 @@ export class TokenService {
         return new SignJWT(payload)
             .setProtectedHeader({ alg: 'HS256' })
             .setIssuedAt()
-            .setExpirationTime("15m")
+            .setExpirationTime("1h")
             .setIssuer(this.APP_NAME)
             .setAudience(this.APP_NAME)
             .sign(this.ACCESS_TOKEN_SECRET)

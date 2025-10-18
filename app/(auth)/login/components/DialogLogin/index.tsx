@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useState } from "react";
 import { loginApi } from "@/lib/http/services/auth";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
     username: z
@@ -52,6 +53,8 @@ const formSchema = z.object({
  */
 export function DialogLogin() {
 
+    const router = useRouter();
+
     const [tabValue, setTabValue] = useState('email');
 
     const [loginLoading, setLoginLoading] = useState(false);
@@ -72,7 +75,16 @@ export function DialogLogin() {
             const response = await loginApi(values);
             if (response.success) {
                 toast.success("登录成功");
-                console.log(response)
+                if (response?.data?.user) {
+                    localStorage.setItem('LOGIN_USER', JSON.stringify(response?.data?.user));
+                }
+                if (response?.data?.refreshToken) {
+                    localStorage.setItem('REFRESH_TOKEN', response.data.refreshToken);
+                }
+                if (response?.data?.token) {
+                    localStorage.setItem('TOKEN', response.data.token);
+                }
+                router.push("/home");
             } else {
                 toast.error(response?.message);
             }

@@ -45,7 +45,7 @@ export interface RegisterRequest {
  * 注册响应
  */
 export interface RegisterResponse extends ResponseData<User> {
-	
+
 }
 
 
@@ -59,6 +59,8 @@ export interface LoginRequest {
 	password: string;
 }
 
-export interface LoginResponse extends ResponseData<User> {
-
+export interface LoginResponse {
+	user: User;
+	refreshToken: string;
+	token: string;
 }
