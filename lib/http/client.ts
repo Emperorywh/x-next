@@ -133,10 +133,12 @@ class HttpClient {
 			async (config: InternalAxiosRequestConfig) => {
 				const customConfig = config as InternalAxiosRequestConfig & RequestConfig;
 
-				// token
-				const token = localStorage.getItem("TOKEN");
-				if (token) {
-					config.headers['Authorization'] = `Bearer ${token}`;
+				// token - 只在客户端环境中获取
+				if (typeof window !== 'undefined') {
+					const token = localStorage.getItem("TOKEN");
+					if (token) {
+						config.headers['Authorization'] = `Bearer ${token}`;
+					}
 				}
 
 				// 生成请求 ID
@@ -407,6 +409,11 @@ class HttpClient {
 	 * 文件下载
 	 */
 	async download(url: string, filename?: string, config?: RequestConfig): Promise<void> {
+		// 只在客户端环境中执行下载
+		if (typeof window === 'undefined') {
+			throw new Error('文件下载功能只能在客户端环境中使用');
+		}
+
 		const response = await this.instance.get(url, {
 			...config,
 			responseType: 'blob',
