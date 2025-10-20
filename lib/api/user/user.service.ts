@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-import { registerSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
+import { getUserInfoSchema, GetUserInfoSchemaDto, registerSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
 import { extractZodErrors, formatLocalDateTime, hashPassword, verifyPassword } from "@/lib/utils";
 import { ServiceResponseJson } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
@@ -162,6 +162,46 @@ export class UserService {
                 message: '登录成功',
                 success: true,
             })
+        } catch (error) {
+            return ServiceResponseJson({
+                data: null,
+                message: '系统错误',
+                success: false,
+                error: JSON.stringify(error)
+            })
+        }
+    }
+
+    /**
+     * 根据用户ID查询用户信息
+     * @param idDto 
+     * @returns 
+     */
+    static async getUserInfoById(idDto: GetUserInfoSchemaDto) {
+        try {
+            // 验证路径参数
+            const validationResult = getUserInfoSchema.parse(idDto);
+
+            const user = await prisma.user.findFirst({
+                where: {
+                    id: validationResult.id
+                },
+            });
+            if (user) {
+                return ServiceResponseJson({
+                    data: {
+                        ...user,
+                        password: undefined
+                    },
+                    message: "获取成功",
+                    success: true
+                });
+            }
+            return ServiceResponseJson({
+                data: null,
+                message: "用户ID错误",
+                success: true
+            });
         } catch (error) {
             return ServiceResponseJson({
                 data: null,

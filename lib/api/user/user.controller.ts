@@ -1,5 +1,5 @@
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
-import { loginSchema, registerSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
+import { getUserInfoSchema, GetUserInfoSchemaDto, loginSchema, registerSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
 import { UserService } from "./user.service";
 import { User } from "./user.types";
 import z from "zod";
@@ -74,6 +74,27 @@ export class UserController {
                 error: JSON.stringify(error),
                 status: 500
             });
+        }
+    }
+
+    /**
+     * 根据用户ID查询用户信息
+     * @param idDto 
+     * @returns 
+     */
+    static async getUserInfoById(idDto: GetUserInfoSchemaDto): Promise<ApiResponse<User>> {
+        try {
+            // 验证路径参数
+            const validationResult = getUserInfoSchema.parse(idDto);
+            const response = await UserService.getUserInfoById(validationResult);
+            return ServiceResponseJson(response);
+        } catch (error) {
+            return ServiceResponseJson({
+                data: null,
+                message: '系统错误',
+                success: false,
+                error: JSON.stringify(error)
+            })
         }
     }
 }

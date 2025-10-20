@@ -1,40 +1,21 @@
-import { NextResponseJson } from "@/lib/api-response";
-import { prisma } from "@/lib/prisma";
+import { ApiResponse, NextResponseJson } from "@/lib/api-response";
+import { UserController } from "@/lib/api/user/user.controller";
+import { getUserInfoSchema } from "@/lib/api/user/user.schema";
+import { User } from "@/lib/api/user/user.types";
 import { extractZodErrors } from "@/lib/utils";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
-const getUserInfoSchema = z.object({
-    id: z.string().min(1, "用户ID不能为空")
-});
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<User>>> {
     try {
         const queryId = request.nextUrl.searchParams.get('id');
 
         const validationResult = getUserInfoSchema.parse({ id: queryId });
 
-        const user = await prisma.user.findFirst({
-            where: {
-                id: validationResult.id
-            },
-        });
+        const response = await UserController.getUserInfoById(validationResult);
 
-        if (user) {
-            return NextResponseJson({
-                data: {
-                    ...user,
-                    password: undefined
-                },
-                message: "获取成功",
-                success: true
-            });
-        }
-        return NextResponseJson({
-            data: null,
-            message: "用户ID错误",
-            success: true
-        });
+        return NextResponseJson(response);
     } catch (error) {
         if (error instanceof z.ZodError) {
             return NextResponseJson({

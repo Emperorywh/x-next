@@ -62,3 +62,16 @@ export const loginSchema = z.object({
  * 用户登录DTO
  */
 export type UserLoginDto = z.infer<typeof loginSchema>;
+
+
+/**
+ * 根据用户ID获取用户信息Schema
+ */
+export const getUserInfoSchema = z.object({
+    id: z.string().min(1, "用户ID不能为空")
+});
+
+/**
+ * 根据用户ID获取用户信息DTO
+ */
+export type GetUserInfoSchemaDto = z.infer<typeof getUserInfoSchema>
