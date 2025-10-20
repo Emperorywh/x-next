@@ -7,8 +7,8 @@ export async function middleware(request: NextRequest) {
     // 公开路由（不需要 token）
     const publicRoutes = [
         '/',
-        '/api/auth/login',
-        '/api/auth/register',
+        '/api/user/login',
+        '/api/user/register',
         '/api/email/send-verification-code',
         '/login',
         '/register'

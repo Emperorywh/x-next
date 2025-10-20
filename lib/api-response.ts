@@ -63,3 +63,19 @@ export function NextResponseJson<T>(
 		{ status }
 	);
 }
+
+/**
+ * service层的返回值
+ * @param options 
+ * @returns 
+ */
+export function ServiceResponseJson<T>(options: NextResponseOptions): ApiResponse<T> {
+	const { data, message = '操作成功', success = false, code = '', error } = options;
+	return {
+		data,
+		message,
+		success,
+		code,
+		error
+	}
+}

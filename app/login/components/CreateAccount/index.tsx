@@ -32,10 +32,10 @@ import { z } from "zod";
 import { zhCN } from "date-fns/locale";
 import { SendVerificationCodeRequest } from "@/lib/http/services/email/types";
 import { sendVerificationCodeApi } from "@/lib/http/services/email";
-import { RegisterRequest } from "@/lib/http/services/auth/types";
-import { registerApi } from "@/lib/http/services/auth";
+import { registerApi } from "@/lib/http/services/user";
 import { toast } from "sonner"
 import { IconX } from "@/components/features/Icon";
+import { UserRegisterDto } from "@/lib/api/user/user.schema";
 
 const FormSchema = z.object({
     username: z
@@ -99,7 +99,7 @@ export function CreateAccount() {
         setIsLoading(true);
         try {
             // 转换数据格式以匹配后端 API
-            const registerData: RegisterRequest = {
+            const registerData: UserRegisterDto = {
                 username: data.username,
                 email: data.email,
                 phoneNumber: data.phoneNumber || undefined,
