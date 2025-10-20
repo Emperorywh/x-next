@@ -1,6 +1,6 @@
 // middleware.ts 增强版
 import { NextRequest, NextResponse } from "next/server";
-import { TokenService } from "./lib/auth/authTokenService";
+import { JWTService } from "./lib/api/jwt/jwt.service";
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -39,7 +39,7 @@ async function validateApiToken(request: NextRequest) {
     }
 
     const token = authorization.replace('Bearer ', '');
-    const payload = await TokenService.verifyAccessToken(token);
+    const payload = await JWTService.verifyAccessToken(token);
 
     if (!payload) {
         return NextResponse.json(
@@ -67,7 +67,7 @@ async function validatePageToken(request: NextRequest) {
     }
 
     // 2. 验证 accessToken
-    const payload = await TokenService.verifyAccessToken(accessToken);
+    const payload = await JWTService.verifyAccessToken(accessToken);
     if (payload) {
         return NextResponse.next();
     }

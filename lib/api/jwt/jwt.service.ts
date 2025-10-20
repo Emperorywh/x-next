@@ -1,13 +1,8 @@
+import EnvironmentConfig from '@/lib/config/env';
 import { SignJWT, jwtVerify } from 'jose'
-import EnvironmentConfig from '../config/env'
 
-export class TokenService {
+export class JWTService {
 
-    // private static readonly ACCESS_TOKEN_SECRET: Uint8Array = new TextEncoder().encode(EnvironmentConfig.tokenConfig.accessTokenSecret as string);
-    // private static readonly REFRESH_TOKEN_SECRET: Uint8Array = new TextEncoder().encode(EnvironmentConfig.tokenConfig.refreshTokenSecret as string);
-    // private static readonly APP_NAME = EnvironmentConfig.appName as string;
-
-    // 确保密钥一致性 - 使用静态方法获取
     private static getAccessTokenSecret(): Uint8Array {
         const secret = EnvironmentConfig.tokenConfig.accessTokenSecret as string;
         if (!secret) {

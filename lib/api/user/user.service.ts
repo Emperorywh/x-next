@@ -4,8 +4,8 @@ import { extractZodErrors, formatLocalDateTime, hashPassword, verifyPassword } f
 import { ServiceResponseJson } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { VerificationCodeService } from "@/lib/redis";
-import { TokenService } from "@/lib/auth/authTokenService";
 import { LoginResponse, User } from "./user.types";
+import { JWTService } from "../jwt/jwt.service";
 
 export class UserService {
 
@@ -161,10 +161,10 @@ export class UserService {
                         ...existingUser,
                         password: undefined
                     },
-                    token: await TokenService.generateAccessToken({
+                    token: await JWTService.generateAccessToken({
                         userId: existingUser.id
                     }),
-                    refreshToken: await TokenService.generateRefreshToken({
+                    refreshToken: await JWTService.generateRefreshToken({
                         userId: existingUser.id
                     })
                 },

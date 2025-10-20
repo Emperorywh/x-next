@@ -5,9 +5,6 @@
 
 import { NextResponse } from 'next/server';
 
-/**
- * 统一响应数据结构（与前端 ResponseData 保持一致）
- */
 export interface ApiResponse<T = any> {
 	/** 响应数据 */
 	data: T;
