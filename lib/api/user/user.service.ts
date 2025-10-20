@@ -9,21 +9,12 @@ import { JWTService } from "../jwt/jwt.service";
 
 export class UserService {
 
-    private static instance: UserService;
-
-    static getInstance(): UserService {
-        if (!UserService.instance) {
-            UserService.instance = new UserService();
-        }
-        return UserService.instance;
-    }
-
     /**
      * 用户注册
      * @param userRegister 
      * @returns 
      */
-    async register(userRegister: UserRegisterDto) {
+    static async register(userRegister: UserRegisterDto) {
         try {
             // 验证输入数据
             const validatedData = registerSchema.parse(userRegister);
@@ -129,7 +120,7 @@ export class UserService {
      * @param userLogin 
      * @returns 
      */
-    async login(userLogin: UserLoginDto) {
+    static async login(userLogin: UserLoginDto) {
         try {
             const existingUser = await prisma.user.findFirst({
                 where: {
@@ -181,5 +172,3 @@ export class UserService {
         }
     }
 }
-
-export const userService = UserService.getInstance();

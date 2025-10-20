@@ -1,6 +1,6 @@
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
 import { loginSchema, registerSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
-import { userService } from "./user.service";
+import { UserService } from "./user.service";
 import { User } from "./user.types";
 import z from "zod";
 import { extractZodErrors } from "@/lib/utils";
@@ -14,7 +14,7 @@ export class UserController {
     static async register(userRegister: UserRegisterDto): Promise<ApiResponse<User>> {
         try {
             const validateData = registerSchema.parse(userRegister);
-            const result = await userService.register(validateData);
+            const result = await UserService.register(validateData);
             return ServiceResponseJson<User>({
                 data: result?.data,
                 message: result?.message || "注册成功",
@@ -49,7 +49,7 @@ export class UserController {
         try {
             const validateData = loginSchema.parse(userLogin);
 
-            const result = await userService.login(validateData);
+            const result = await UserService.login(validateData);
 
             return ServiceResponseJson<User>({
                 data: result?.data,
