@@ -1,55 +1,37 @@
-import { IPostListProps } from "./types";
-import { useEffect, useState } from "react";
-import { getPostListApi } from "@/lib/http/services/post";
-import { toast } from "sonner";
-import { Post } from "@/lib/api/post/post.types";
-import { PostItem } from "./PostItem";
+import { postList } from "@/app/actions/post/post.action"
+import { PostListClient } from "./PostListClient";
 import { PostListSkeleton } from "./PostListSkeleton";
+import { Suspense } from "react";
+
 /**
  * 帖子列表
  */
-export const PostList = (props: IPostListProps) => {
+export const PostList = () => {
+    return (
+        <Suspense fallback={<PostListSkeleton />}>
+            <PostListAsync />
+        </Suspense>
+    );
+}
 
-    const { } = props;
-
-    const [dataSource, setDataSource] = useState<Post[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [pagination, setPagination] = useState({
-        pageIndex: 1,
-        pageSize: 10
-    });
-
-    /**
-     * 获取数据源
-     */
-    const getDataSource = async () => {
-        try {
-            setLoading(true);
-            const response = await getPostListApi({
-                pageIndex: pagination.pageIndex,
-                pageSize: pagination.pageSize
-            });
-            if (response.success) {
-                setDataSource(prev => [...prev, ...response.data.list]);
-            } else {
-                toast.error(response.message || '获取失败')
-            }
-        } catch (error) {
-
-        } finally {
-            setLoading(false);
+/**
+ * 异步获取帖子列表数据
+ */
+const PostListAsync = async () => {
+    try {
+        const response = await postList({
+            pageIndex: 1,
+            pageSize: 10
+        });
+        if (response.success) {
+            return (
+                <div className="w-full h-full overflow-scroll">
+                    <PostListClient initialDataSource={response.data?.list} initialPagination={response.data.pagination} />
+                </div>
+            );
         }
-    };
-
-    useEffect(() => {
-        getDataSource();
-    }, [pagination])
-
-    return <div className="w-full h-full overflow-scroll">
-        {
-            loading ? <PostListSkeleton /> : dataSource?.map(post => {
-                return <PostItem post={post} key={post.id} />
-            })
-        }
-    </div>
+        return <PostListSkeleton />
+    } catch (error) {
+        return <PostListSkeleton />
+    }
 }

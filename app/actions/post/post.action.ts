@@ -1,3 +1,4 @@
+'use server';
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
 import { CreatePostDto, createPostSchema, ListPostDto, listPostSchema, UpdatePostDto, updatePostSchema } from "@/lib/api/post/post.schema";
 import { PostService } from "@/lib/api/post/post.service";
@@ -43,6 +44,14 @@ export async function postCreate(createPostDto: CreatePostDto, userId: string): 
     }
 }
 
+const sleep = (time = 3000) => {
+    return new Promise<void>((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, time)
+    })
+}
+
 /**
 * 列表查询帖子
 * @param listPostDto 
@@ -52,6 +61,7 @@ export async function postList(listPostDto: ListPostDto): Promise<ApiResponse<Po
     try {
         const validateData = listPostSchema.parse(listPostDto);
         const response = await PostService.list(validateData);
+        await sleep();
         return ServiceResponseJson(response);
     } catch (error) {
         console.error('未知错误：', error);

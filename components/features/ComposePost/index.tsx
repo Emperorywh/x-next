@@ -1,3 +1,4 @@
+'use client';
 import Image from 'next/image'
 import { ComposePostProps } from "./types";
 import { Textarea } from '@/components/ui/textarea';

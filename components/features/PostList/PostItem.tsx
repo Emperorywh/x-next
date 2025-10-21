@@ -1,11 +1,28 @@
 import { Post } from "@/lib/api/post/post.types";
 import { ChartNoAxesColumnIncreasing, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Image from 'next/image';
+import { useMemo } from "react";
 
 /**
  * 单个帖子组件
  */
 export const PostItem = ({ post }: { post: Post }) => {
+    // 格式化时间显示
+    const formattedTime = useMemo(() => {
+        const now = new Date();
+        const postTime = new Date(post.createdAt);
+        const diffInMinutes = Math.floor((now.getTime() - postTime.getTime()) / (1000 * 60));
+
+        if (diffInMinutes < 1) return '刚刚';
+        if (diffInMinutes < 60) return `${diffInMinutes}分钟前`;
+        if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}小时前`;
+        if (diffInMinutes < 10080) return `${Math.floor(diffInMinutes / 1440)}天前`;
+
+        return postTime.toLocaleDateString('zh-CN', {
+            month: 'short',
+            day: 'numeric'
+        });
+    }, [post.createdAt]);
     return (
         <div className="flex gap-2 border-b-1 p-4 hover:bg-gray-50 transition-colors">
             <div className="shrink-0">
@@ -29,7 +46,7 @@ export const PostItem = ({ post }: { post: Post }) => {
                         <div className="text-gray-400 flex items-center gap-2">
                             <span>·</span>
                             <span className="text-[14px]">
-                                {new Date(post?.createdAt).toLocaleDateString()}
+                                {formattedTime}
                             </span>
                         </div>
                     </div>

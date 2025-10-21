@@ -1,3 +1,4 @@
+'use server';
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
 import { getUserInfoSchema, GetUserInfoSchemaDto, loginSchema, registerSchema, UserLoginDto, UserRegisterDto } from "@/lib/api/user/user.schema";
 import { UserService } from "@/lib/api/user/user.service";
