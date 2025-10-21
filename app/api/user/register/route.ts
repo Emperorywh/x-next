@@ -1,5 +1,5 @@
+import { userRegister } from "@/app/actions/user/user.action";
 import { ApiResponse, NextResponseJson } from "@/lib/api-response";
-import { UserController } from "@/lib/api/user/user.controller";
 import { registerSchema } from "@/lib/api/user/user.schema";
 import { User } from "@/lib/api/user/user.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
         const validateData = registerSchema.parse(body);
 
-        const response = await UserController.register(validateData);
+        const response = await userRegister(validateData);
 
         return NextResponseJson(response);
 

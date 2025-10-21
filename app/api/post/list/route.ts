@@ -1,5 +1,5 @@
+import { postList } from "@/app/actions/post/post.action";
 import { ApiResponse, NextResponseJson } from "@/lib/api-response";
-import { PostController } from "@/lib/api/post/post.controller";
 import { listPostSchema } from "@/lib/api/post/post.schema";
 import { PostListResponse } from "@/lib/api/post/post.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     try {
         const body = await request.json();
         const validateData = listPostSchema.parse(body);
-        const response = await PostController.list(validateData);
+        const response = await postList(validateData);
         return NextResponseJson(response);
 
     } catch (error) {

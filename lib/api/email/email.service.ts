@@ -3,126 +3,105 @@ import * as nodemailer from 'nodemailer';
 import { SendCodeVerificationCodeDto, sendVerificationCodeSchema } from "./email.schema";
 import { VerificationCodeService } from "@/lib/redis";
 import { ServiceResponseJson } from "@/lib/api-response";
-import { ZodError } from "zod";
-import { extractZodErrors } from "@/lib/utils";
 export class EmailService {
 
-    private static transporter: nodemailer.Transporter | null;
+	private static transporter: nodemailer.Transporter | null;
 
-    /**
-     * 发送验证码
-     * @param sendVerificationCodeDto 
-     * @returns 
-     */
-    static async sendVerificationCode(sendVerificationCodeDto: SendCodeVerificationCodeDto) {
-        try {
-            const { email, type } = sendVerificationCodeSchema.parse(sendVerificationCodeDto);
-            const cooldownStatus = await VerificationCodeService.isInCooldown(email);
-            if (cooldownStatus.inCooldown) {
-                return ServiceResponseJson({
-                    data: null,
-                    message: `请等待 ${cooldownStatus.remainingTime} 秒后再试`,
-                    success: false
-                });
-            }
+	/**
+	 * 发送验证码
+	 * @param sendVerificationCodeDto 
+	 * @returns 
+	 */
+	static async sendVerificationCode(sendVerificationCodeDto: SendCodeVerificationCodeDto) {
+		const { email, type } = sendVerificationCodeSchema.parse(sendVerificationCodeDto);
+		const cooldownStatus = await VerificationCodeService.isInCooldown(email);
+		if (cooldownStatus.inCooldown) {
+			return ServiceResponseJson({
+				data: null,
+				message: `请等待 ${cooldownStatus.remainingTime} 秒后再试`,
+				success: false
+			});
+		}
 
-            // 生成验证码
-            const code = this.generateVerificationCode();
+		// 生成验证码
+		const code = this.generateVerificationCode();
 
-            // 存储验证码到 Redis
-            await VerificationCodeService.storeCode(email, code, type);
+		// 存储验证码到 Redis
+		await VerificationCodeService.storeCode(email, code, type);
 
-            // 创建邮件发送器
-            // const transporter = createTransporter();
+		// 创建邮件发送器
+		// const transporter = createTransporter();
 
-            // const emailContent = createEmailTemplate(code, type);
+		// const emailContent = createEmailTemplate(code, type);
 
-            // // 邮件配置
-            // const emailConfig = EnvironmentConfig.emailConfig;
+		// // 邮件配置
+		// const emailConfig = EnvironmentConfig.emailConfig;
 
-            // await transporter.sendMail({
-            //     from: `邮件通知 <${emailConfig.user}>`,
-            //     to: email,
-            //     subject: emailContent.subject,
-            //     html: emailContent.html,
-            //     text: emailContent.text
-            // });
+		// await transporter.sendMail({
+		//     from: `邮件通知 <${emailConfig.user}>`,
+		//     to: email,
+		//     subject: emailContent.subject,
+		//     html: emailContent.html,
+		//     text: emailContent.text
+		// });
 
-            await VerificationCodeService.setCooldown(email);
+		await VerificationCodeService.setCooldown(email);
 
-            return ServiceResponseJson({
-                data: {
-                    message: '验证码已发送到您的邮箱',
-                    expiresIn: 600
-                },
-                message: '验证码已发送到您的邮箱',
-                success: true
-            });
-        } catch (error) {
-            console.error('未知错误：', error);
-            if (error instanceof ZodError) {
-                const errorInfo = extractZodErrors(error)
-                return ServiceResponseJson({
-                    data: null,
-                    message: '数据验证失败',
-                    success: false,
-                    error: errorInfo.errors
-                })
-            }
-            return ServiceResponseJson({
-                data: null,
-                message: '系统错误',
-                success: false,
-                error: JSON.stringify(error)
-            })
-        }
-    }
+		return ServiceResponseJson({
+			data: {
+				message: '验证码已发送到您的邮箱',
+				expiresIn: 600
+			},
+			message: '验证码已发送到您的邮箱',
+			success: true
+		});
+	}
 
-    /**
-     * 生成6位数字验证码
-     * @returns 
-     */
-    private static generateVerificationCode(): string {
-        return Math.floor(100000 + Math.random() * 900000).toString();
-    }
+	/**
+	 * 生成6位数字验证码
+	 * @returns 
+	 */
+	private static generateVerificationCode(): string {
+		return Math.floor(100000 + Math.random() * 900000).toString();
+	}
 
-    /**
-     * 创建邮件发送器
-     * @returns 
-     */
-    private static createTransporter() {
-        const emailConfig = EnvironmentConfig.emailConfig;
-        if (this.transporter) {
-            return this.transporter;
-        }
-        this.transporter = nodemailer.createTransport({
-            host: emailConfig.host,
-            port: emailConfig.port,
-            secure: false,
-            auth: {
-                user: emailConfig.user,
-                pass: emailConfig.password,
-            },
-        } as any)
-        return this.transporter;
-    }
+	/**
+	 * 创建邮件发送器
+	 * @returns 
+	 */
+	private static createTransporter() {
+		const emailConfig = EnvironmentConfig.emailConfig;
+		if (this.transporter) {
+			return this.transporter;
+		}
+		this.transporter = nodemailer.createTransport({
+			host: emailConfig.host,
+			port: emailConfig.port,
+			secure: false,
+			auth: {
+				user: emailConfig.user,
+				pass: emailConfig.password,
+			},
+		} as any)
+		return this.transporter;
+	}
 
-    /**
-     * 创建邮件模板
-     * @param code 
-     * @param type 
-     * @returns 
-     */
-    private static createEmailTemplate(code: string, type: string) {
-        const typeText = {
-            register: '注册',
-            login: '登录',
-            'reset-password': '重置密码'
-        }[type] || '注册';
+	/**
+	 * 创建邮件模板
+	 * @param code 
+	 * @param type 
+	 * @returns 
+	 */
+	private static createEmailTemplate(code: string, type: string) {
+		const typeText = {
+			register: '注册',
+			login: '登录',
+			'reset-password': '重置密码'
+		}[type] || '注册';
 
-        return {
-            subject: `【验证码】${typeText}验证码 - ${code}`,
-            html: `
+		return {
+			subject: `【验证码】${typeText}验证码 - ${code}`,
+			html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center;">
           <h1 style="color: white; margin: 0; font-size: 28px;">验证码</h1>
@@ -151,13 +130,13 @@ export class EmailService {
         </div>
       </div>
     `,
-            text: `
+			text: `
       您的${typeText}验证码是：${code}
       
       验证码有效期为 10 分钟，请及时使用。
       
       如非本人操作，请忽略此邮件。
     `
-        };
-    }
+		};
+	}
 }

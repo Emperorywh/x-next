@@ -1,5 +1,5 @@
+import { userGetInfoById } from "@/app/actions/user/user.action";
 import { ApiResponse, NextResponseJson } from "@/lib/api-response";
-import { UserController } from "@/lib/api/user/user.controller";
 import { getUserInfoSchema } from "@/lib/api/user/user.schema";
 import { User } from "@/lib/api/user/user.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
 
         const validationResult = getUserInfoSchema.parse({ id: pathId });
 
-        const response = await UserController.getUserInfoById(validationResult);
+        const response = await userGetInfoById(validationResult);
 
         return NextResponseJson(response);
 

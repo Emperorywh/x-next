@@ -1,5 +1,5 @@
+import { postCreate } from "@/app/actions/post/post.action";
 import { ApiResponse, NextResponseJson } from "@/lib/api-response";
-import { PostController } from "@/lib/api/post/post.controller";
 import { createPostSchema } from "@/lib/api/post/post.schema";
 import { Post } from "@/lib/api/post/post.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
                 status: 400
             });
         }
-        const response = await PostController.create(postInfo, userId);
+        const response = await postCreate(postInfo, userId);
         return NextResponseJson(response)
     } catch (error) {
         console.log(error)

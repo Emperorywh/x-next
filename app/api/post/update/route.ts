@@ -1,5 +1,5 @@
+import { postUpdate } from "@/app/actions/post/post.action";
 import { ApiResponse, NextResponseJson } from "@/lib/api-response";
-import { PostController } from "@/lib/api/post/post.controller";
 import { updatePostSchema } from "@/lib/api/post/post.schema";
 import { Post } from "@/lib/api/post/post.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -25,7 +25,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse<ApiRespons
         }
         const body = await request.json();
         const validateData = updatePostSchema.parse(body);
-        const response = await PostController.update(validateData, userId);
+        const response = await postUpdate(validateData, userId);
         return NextResponseJson(response);
     } catch (error) {
         console.log(error)

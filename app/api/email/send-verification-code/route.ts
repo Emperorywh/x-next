@@ -2,9 +2,9 @@ import { extractZodErrors } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { ApiResponse, NextResponseJson } from '@/lib/api-response';
-import { EmailController } from "@/lib/api/email/email.controller";
 import { sendVerificationCodeSchema } from "@/lib/api/email/email.schema";
 import { SendVerificationCodeRespnse } from "@/lib/api/email/email.types";
+import { emailSendVerificationCode } from "@/app/actions/email/email.action";
 
 /**
  * 发送验证码
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     try {
         const body = await request.json();
         const validateData = sendVerificationCodeSchema.parse(body);
-        const rsponse = await EmailController.sendVerificationCode(validateData);
+        const rsponse = await emailSendVerificationCode(validateData);
         return NextResponseJson(rsponse);
     } catch (error) {
         if (error instanceof z.ZodError) {
