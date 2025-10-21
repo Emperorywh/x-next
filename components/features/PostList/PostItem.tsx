@@ -1,4 +1,4 @@
-import { Post } from "@/lib/http/services/post/types";
+import { Post } from "@/lib/api/post/post.types";
 import { ChartNoAxesColumnIncreasing, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Image from 'next/image';
 
