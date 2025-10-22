@@ -2,6 +2,7 @@ import { Post } from "@/lib/api/post/post.types";
 import { ChartNoAxesColumnIncreasing, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Image from 'next/image';
 import { useMemo } from "react";
+import { PostReply } from "../PostReply";
 
 /**
  * 单个帖子组件
@@ -27,7 +28,7 @@ export const PostItem = ({ post }: { post: Post }) => {
         <div className="flex gap-2 border-b-1 p-4 hover:bg-gray-50 transition-colors">
             <div className="shrink-0">
                 <Image
-                    src={post?.author?.image || '/default-avatar.png'}
+                    src={post?.author?.image || ''}
                     alt={`${post.author.username} 头像`}
                     width={40}
                     height={40}
@@ -56,7 +57,6 @@ export const PostItem = ({ post }: { post: Post }) => {
                     style={{
                         display: '-webkit-box',
                         WebkitBoxOrient: 'vertical',
-                        WebkitLineClamp: 10,
                         wordBreak: 'break-all',
                         overflowWrap: 'anywhere',
                     }}
@@ -64,10 +64,7 @@ export const PostItem = ({ post }: { post: Post }) => {
                     {post.content}
                 </div>
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 cursor-pointer text-[#536471] hover:text-[#1D9BF0] transition-colors">
-                        <MessageCircle className="w-[35px] h-[35px] text-current transition-colors hover:bg-[#E8F5FD] p-2 rounded-full" />
-                        <span>{post.repliesCount}</span>
-                    </div>
+                    <PostReply post={post} />
                     <div className="flex items-center gap-1 w-[114px] cursor-pointer text-[#536471] hover:text-[#00BA7C] transition-colors">
                         <Repeat2 className="w-[35px] h-[35px] text-current transition-colors hover:bg-[#00ba7c1a] p-2 rounded-full" />
                         <span>{post.retweetsCount}</span>

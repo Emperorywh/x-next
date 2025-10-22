@@ -10,7 +10,6 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { createPostApi } from '@/lib/http/services/post';
 
-
 /**
  * 撰写帖子
  */
