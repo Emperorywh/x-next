@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { JWTService } from "./lib/api/jwt/jwt.service";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     // 公开路由（不需要 token）
     const publicRoutes = [
