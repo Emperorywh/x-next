@@ -24,9 +24,7 @@ const PostListAsync = async () => {
             pageSize: 10
         });
         if (response.success) {
-            return (
-                <PostListClient initialDataSource={response.data?.list} initialPagination={response.data.pagination} />
-            );
+            return <PostListClient initialDataSource={response.data?.list} initialPagination={response.data.pagination} />
         }
         return <PostListSkeleton />
     } catch (error) {

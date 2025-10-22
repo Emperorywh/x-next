@@ -68,7 +68,7 @@ export const PostListClient = (props: IPostListProps) => {
     }, [pagination, loading]); // 添加相关状态到依赖数组
 
     return (
-        <div className="w-full h-full overflow-y-auto">
+        <div className="grow overflow-y-auto">
             {
                 dataSource.map(post => (
                     <PostItem post={post} key={post.id} />
