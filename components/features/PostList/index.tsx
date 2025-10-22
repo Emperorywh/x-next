@@ -25,9 +25,7 @@ const PostListAsync = async () => {
         });
         if (response.success) {
             return (
-                <div className="w-full h-full overflow-scroll">
-                    <PostListClient initialDataSource={response.data?.list} initialPagination={response.data.pagination} />
-                </div>
+                <PostListClient initialDataSource={response.data?.list} initialPagination={response.data.pagination} />
             );
         }
         return <PostListSkeleton />

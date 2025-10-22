@@ -33,7 +33,6 @@ export const PostListClient = (props: IPostListProps) => {
                 pageIndex: pagination.pageIndex + 1,
                 pageSize: pagination.pageSize
             });
-            console.log("pagination", pagination);
             if (response.success && response.data) {
                 setDataSource(prev => [...prev, ...response.data.list]);
                 setPagination(response.data.pagination);
@@ -48,16 +47,17 @@ export const PostListClient = (props: IPostListProps) => {
     // 设置无限滚动观察器
     useEffect(() => {
         const el = sentinelRef?.current;
-        if (!el || !pagination.hasNextPage) return;
+        if (!el) return;
         const observer = new IntersectionObserver(
             (entries) => {
                 const [entry] = entries;
-                if (entry.isIntersecting && !loading) {
+                // 将状态检查移到回调内部，确保每次触发时都检查最新状态
+                if (entry.isIntersecting && pagination.hasNextPage && !loading) {
                     loadMore();
                 }
             },
             {
-                rootMargin: '10px',
+                rootMargin: '20px', // 减少提前加载距离，只在真正接近底部时才触发
                 threshold: 0.1
             }
         );
@@ -65,30 +65,26 @@ export const PostListClient = (props: IPostListProps) => {
         return () => {
             observer.disconnect();
         };
-    }, []);
+    }, [pagination, loading]); // 添加相关状态到依赖数组
 
     return (
-        <div className="w-full h-full flex flex-col overflow-hidden">
-            {/* 帖子列表 */}
-            <div className="grow overflow-y-auto">
-                {
-                    dataSource.map(post => (
-                        <PostItem post={post} key={post.id} />
-                    ))
-                }
-                {
-                    loading && dataSource.length > 0 && <PostListSkeleton />
-                }
-                {!pagination.hasNextPage && dataSource.length > 0 && (
-                    <div className="flex justify-center items-center py-6 text-gray-400">
-                        <div className="text-center">
-                            <div className="text-sm">没有更多内容了</div>
-                            <div className="text-xs mt-1">已经到底了</div>
-                        </div>
+        <div className="w-full h-full overflow-y-auto">
+            {
+                dataSource.map(post => (
+                    <PostItem post={post} key={post.id} />
+                ))
+            }
+            {
+                loading && dataSource.length > 0 && <PostListSkeleton />
+            }
+            {!pagination.hasNextPage && dataSource.length > 0 && (
+                <div className="flex justify-center items-center py-6 text-gray-400">
+                    <div className="text-center">
+                        <div className="text-sm">没有更多内容了</div>
+                        <div className="text-xs mt-1">已经到底了</div>
                     </div>
-                )}
-            </div>
-
+                </div>
+            )}
             {pagination.hasNextPage && (
                 <div ref={sentinelRef} className="h-1 w-full" />
             )}
