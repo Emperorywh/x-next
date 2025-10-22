@@ -56,7 +56,7 @@ export const PostItem = ({ post }: { post: Post }) => {
                     style={{
                         display: '-webkit-box',
                         WebkitBoxOrient: 'vertical',
-                        WebkitLineClamp: 5,
+                        WebkitLineClamp: 10,
                         wordBreak: 'break-all',
                         overflowWrap: 'anywhere',
                     }}

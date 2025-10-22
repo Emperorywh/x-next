@@ -181,7 +181,7 @@ export function ComposePost(props: ComposePostProps) {
                         </PopoverContent>
                     </Popover>
                 </div>
-                <Button className="cursor-pointer" onClick={handlePost}>
+                <Button className="cursor-pointer rounded-full px-6" onClick={handlePost}>
                     {
                         loading ? '发贴中...' : '发帖'
                     }
