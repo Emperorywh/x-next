@@ -1,5 +1,6 @@
 'use server';
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
+import { withAuth } from "@/lib/api/auth/auth";
 import { CreatePostDto, createPostSchema, ListPostDto, listPostSchema, UpdatePostDto, updatePostSchema } from "@/lib/api/post/post.schema";
 import { PostService } from "@/lib/api/post/post.service";
 import { Post, PostListResponse } from "@/lib/api/post/post.types";
@@ -12,7 +13,7 @@ import { ZodError } from "zod";
  * @param userId 
  * @returns 
  */
-export async function postCreate(createPostDto: CreatePostDto, userId: string): Promise<ApiResponse<Post>> {
+export const postCreate = withAuth(async (createPostDto: CreatePostDto, userId: string): Promise<ApiResponse<Post>> => {
     try {
         if (!userId) {
             return ServiceResponseJson({
@@ -42,7 +43,7 @@ export async function postCreate(createPostDto: CreatePostDto, userId: string): 
             error: JSON.stringify(error)
         })
     }
-}
+})
 
 const sleep = (time = 3000) => {
     return new Promise<void>((resolve) => {
@@ -57,7 +58,7 @@ const sleep = (time = 3000) => {
 * @param listPostDto 
 * @returns 
 */
-export async function postList(listPostDto: ListPostDto): Promise<ApiResponse<PostListResponse>> {
+export const postList = withAuth(async (listPostDto: ListPostDto): Promise<ApiResponse<PostListResponse>> => {
     try {
         const validateData = listPostSchema.parse(listPostDto);
         const response = await PostService.list(validateData);
@@ -81,13 +82,13 @@ export async function postList(listPostDto: ListPostDto): Promise<ApiResponse<Po
             error: JSON.stringify(error)
         })
     }
-}
+})
 
 /**
  * 更新帖子
  * @param updatePostDto 
  */
-export async function postUpdate(updatePostDto: UpdatePostDto, userId: string): Promise<ApiResponse<Post>> {
+export const postUpdate = withAuth(async (updatePostDto: UpdatePostDto, userId: string): Promise<ApiResponse<Post>> => {
     try {
         if (!userId) {
             return ServiceResponseJson({
@@ -117,4 +118,4 @@ export async function postUpdate(updatePostDto: UpdatePostDto, userId: string): 
             error: JSON.stringify(error)
         })
     }
-}
+})

@@ -1,9 +1,10 @@
-// middleware.ts 增强版
+// proxy.ts
 import { NextRequest, NextResponse } from "next/server";
 import { JWTService } from "./lib/api/jwt/jwt.service";
 
 export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
+
     // 公开路由（不需要 token）
     const publicRoutes = [
         '/',
@@ -19,13 +20,17 @@ export async function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // 检测是否为 Server Action 请求
+    const isServerAction = request.headers.get('Next-Action') !== null ||
+        request.headers.get('Next-Router-State-Tree') !== null;
+
     // API 路由需要 token 校验
     if (pathname.startsWith('/api/')) {
         return await validateApiToken(request);
     }
 
-    // 页面路由需要 token 校验
-    return await validatePageToken(request);
+    // 页面路由和 Server Actions 需要 token 校验
+    return await validatePageToken(request, isServerAction);
 }
 
 async function validateApiToken(request: NextRequest) {
@@ -59,32 +64,41 @@ async function validateApiToken(request: NextRequest) {
     });
 }
 
-async function validatePageToken(request: NextRequest) {
+async function validatePageToken(request: NextRequest, isServerAction: boolean) {
     // 1. 从 Cookie 获取 accessToken
     const accessToken = request.cookies.get('accessToken')?.value;
+
     if (!accessToken) {
+        // 如果是 Server Action 请求，让它通过，在 Action 内部处理
+        if (isServerAction) {
+            return NextResponse.next();
+        }
+        // 普通页面请求则重定向
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
     // 2. 验证 accessToken
     const payload = await JWTService.verifyAccessToken(accessToken);
+
     if (payload) {
+        // Token 有效，将用户信息添加到请求头
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set('x-user-id', payload.userId as string);
+
+        return NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        });
+    }
+
+
+    // 如果是 Server Action 请求，让它通过，在 Action 内部处理
+    if (isServerAction) {
         return NextResponse.next();
     }
 
-    // 3. accessToken 过期，尝试刷新
-    // const refreshToken = request.cookies.get('refreshToken')?.value;
-    // if (refreshToken) {
-    //     const newTokens = await refreshAccessToken(refreshToken);
-    //     if (newTokens) {
-    //         // 设置新的 Cookie 并继续
-    //         const response = NextResponse.next();
-    //         setAuthCookies(response, newTokens);
-    //         return response;
-    //     }
-    // }
-
-    // 4. 刷新失败，重定向到登录页
+    // 普通页面请求则重定向到登录页
     return NextResponse.redirect(new URL('/login', request.url));
 }
 

@@ -80,11 +80,11 @@ export function DialogLogin() {
                 }
                 if (response?.data?.refreshToken) {
                     localStorage.setItem('REFRESH_TOKEN', response.data.refreshToken);
-                     document.cookie = `accessToken=${response.data.token}; path=/; secure; samesite=strict`;
+                    document.cookie = `accessToken=${response.data.token}; path=/; secure; samesite=strict`;
                 }
                 if (response?.data?.token) {
                     localStorage.setItem('TOKEN', response.data.token);
-                     document.cookie = `refreshToken=${response.data.refreshToken}; path=/; secure; samesite=strict; httponly`;
+                    document.cookie = `refreshToken=${response.data.refreshToken}; path=/; secure; samesite=strict; httponly`;
                 }
                 router.push("/home");
             } else {

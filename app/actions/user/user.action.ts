@@ -1,5 +1,6 @@
 'use server';
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
+import { withAuth } from "@/lib/api/auth/auth";
 import { getUserInfoSchema, GetUserInfoSchemaDto, loginSchema, registerSchema, UserLoginDto, UserRegisterDto } from "@/lib/api/user/user.schema";
 import { UserService } from "@/lib/api/user/user.service";
 import { User } from "@/lib/api/user/user.types";
@@ -82,7 +83,7 @@ export async function userLogin(userLogin: UserLoginDto): Promise<ApiResponse<Us
  * @param idDto 
  * @returns 
  */
-export async function userGetInfoById(idDto: GetUserInfoSchemaDto): Promise<ApiResponse<User>> {
+export const userGetInfoById = withAuth(async (idDto: GetUserInfoSchemaDto): Promise<ApiResponse<User>> => {
     try {
         // 验证路径参数
         const validationResult = getUserInfoSchema.parse(idDto);
@@ -96,4 +97,4 @@ export async function userGetInfoById(idDto: GetUserInfoSchemaDto): Promise<ApiR
             error: JSON.stringify(error)
         })
     }
-}
+})
