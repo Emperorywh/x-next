@@ -101,7 +101,7 @@ export default function NavigationBar() {
                     </div>
                 </div>
             </Link>
-            <Link href="/home">
+            <Link href="/post">
                 <div className="w-[259px] cursor-pointer">
                     <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                         <IconPost />
