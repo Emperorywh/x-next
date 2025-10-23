@@ -3,6 +3,9 @@ import { ChartNoAxesColumnIncreasing, Heart, MessageCircle, Repeat2 } from "luci
 import Image from 'next/image';
 import { useMemo } from "react";
 import { PostReply } from "../PostReply";
+import { PostForward } from "../PostForward";
+import { PostViews } from "../PostViews";
+import { PostLike } from "../PostLike";
 
 /**
  * 单个帖子组件
@@ -65,18 +68,9 @@ export const PostItem = ({ post }: { post: Post }) => {
                 </div>
                 <div className="flex items-center justify-between">
                     <PostReply post={post} />
-                    <div className="flex items-center gap-1 w-[114px] cursor-pointer text-[#536471] hover:text-[#00BA7C] transition-colors">
-                        <Repeat2 className="w-[35px] h-[35px] text-current transition-colors hover:bg-[#00ba7c1a] p-2 rounded-full" />
-                        <span>{post.retweetsCount}</span>
-                    </div>
-                    <div className="flex items-center gap-1 w-[114px] cursor-pointer text-[#536471] hover:text-[#F91880] transition-colors">
-                        <Heart className="w-[35px] h-[35px] text-current transition-colors hover:bg-[#f918801a] p-2 rounded-full" />
-                        <span>{post.likesCount}</span>
-                    </div>
-                    <div className="flex items-center gap-1 w-[114px] cursor-pointer text-[#536471] hover:text-[#1D9BF0] transition-colors">
-                        <ChartNoAxesColumnIncreasing className="w-[35px] h-[35px] text-current transition-colors hover:bg-[#E8F5FD] p-2 rounded-full" />
-                        <span>{post.bookmarksCount}</span>
-                    </div>
+                    <PostForward post={post} />
+                    <PostLike post={post} />
+                    <PostViews post={post} />
                 </div>
             </div>
         </div>
