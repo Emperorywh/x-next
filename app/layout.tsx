@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-
+import { Inter } from 'next/font/google'
+ 
+// If loading a variable font, you don't need to specify the font weight
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+})
 const geistSans = Geist({
 	variable: "--font-geist-sans",
 	subsets: ["latin"],
@@ -26,7 +32,7 @@ export default function RootLayout({
 	modal: React.ReactNode
 }>) {
 	return (
-		<html lang="zh">
+		<html lang="zh" className={inter.className}>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
