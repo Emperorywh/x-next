@@ -4,7 +4,7 @@ import { MainTabs } from "@/components/features/MainTabs";
 import { PostList } from "@/components/features/PostList";
 
 export default function MainContent() {
-    return <div className="w-[750px] h-[100vh] overflow-hidden flex flex-col box-border flex-shrink-0 border-[#EFF3F4] border-solid border">
+    return <div className="w-[600px] h-[100vh] overflow-hidden flex flex-col box-border flex-shrink-0 border-[#EFF3F4] border-solid border">
         <MainTabs
             items={[
                 {

@@ -1,14 +1,14 @@
 import { IconBookMarks, IconCommunitity, IconGork, IconHome, IconList, IconMessage, IconMore, IconNotification, IconPersonal, IconPost, IconSearch, IconX } from "@/components/features/Icon";
 
 export default function NavigationBar() {
-    return <div className="flex-[0.45] shrink-0 flex justify-end ">
-        <div className="w-[275px] box-border px-4 py-4">
-            <div className="w-[245px] cursor-pointer">
+    return <div className="grow shrink-0 overflow-hidden flex justify-end ">
+        <div className="w-[275px] box-border">
+            <div className="w-[259px] cursor-pointer">
                 <div className="inline-flex items-center p-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconX />
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconHome />
                     <span className="text-[16px] font-medium">
@@ -16,7 +16,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconSearch />
                     <span>
@@ -24,7 +24,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconNotification />
                     <span>
@@ -32,7 +32,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconMessage />
                     <span>
@@ -40,7 +40,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconGork />
                     <span>
@@ -48,7 +48,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconList />
                     <span>
@@ -56,7 +56,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconBookMarks />
                     <span>
@@ -64,7 +64,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconCommunitity />
                     <span>
@@ -72,7 +72,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconPersonal />
                     <span>
@@ -80,7 +80,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconMore />
                     <span>
@@ -88,7 +88,7 @@ export default function NavigationBar() {
                     </span>
                 </div>
             </div>
-            <div className="w-[245px] cursor-pointer">
+            <div className="w-[259px] cursor-pointer">
                 <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
                     <IconPost />
                     <span>
