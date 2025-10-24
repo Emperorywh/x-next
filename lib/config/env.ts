@@ -31,6 +31,15 @@ interface EnvironmentVariables {
      */
     APP_NAME: string;
 
+    /**
+     * MinIO相关配置
+     */
+    MINIO_ENDPOINT: string;
+    MINIO_PORT: string;
+    MINIO_USE_SSL: boolean;
+    MINIO_ACCESS_KEY: string;
+    MINIO_SECRET_KEY: string;
+    MINIO_BUCKET_NAME: string;
 }
 
 
@@ -99,6 +108,20 @@ class EnvironmentConfig {
      */
     static get appName() {
         return this.validateEnvVar('APP_NAME') || '';
+    }
+
+    /**
+     * 获取MinIO相关配置
+     */
+    static get minIOConfig() {
+        return {
+            endPoint: this.validateEnvVar("MINIO_ENDPOINT"),
+            port: this.validateEnvVar("MINIO_PORT"),
+            useSSL: this.validateEnvVar("MINIO_USE_SSL") === 'true' || false,
+            accessKey: this.validateEnvVar("MINIO_ACCESS_KEY"),
+            secretKey: this.validateEnvVar("MINIO_SECRET_KEY"),
+            bucket: this.validateEnvVar("MINIO_BUCKET_NAME")
+        }
     }
 }
 
