@@ -51,6 +51,7 @@ model User {
 
     // 关联关系
     posts          Post[]          @relation("PostAuthor")
+    repliedPosts   Post[]          @relation("PostReplyToUser") // 别人回复给该用户的推文
     likes          PostLike[]      @relation("PostLikes")
     retweets       PostRetweet[]   @relation("PostRetweets")
     bookmarks      PostBookmark[]  @relation("PostBookmarks")
@@ -71,7 +72,14 @@ model Post {
     id         String  @id @default(cuid())
     content    String // 推文内容
     authorId   String // 作者ID
-    parentId   String? // 父推文ID（用于回复）
+    
+    // 回复相关字段
+    parentId       String? // 父推文ID（直接回复的推文）
+    replyToUserId  String? // 被回复用户的ID（用于显示"回复给 @username"）
+    conversationId String? // 对话线程ID（整个对话的根推文ID）
+    replyDepth     Int     @default(0) // 回复深度（0表示根推文，1表示一级回复，以此类推）
+    
+    // 转发相关
     isRetweet  Boolean @default(false) // 是否为转发
     originalId String? // 原始推文ID（转发时使用）
 
@@ -80,34 +88,45 @@ model Post {
     isEdited  Boolean   @default(false) // 是否已编辑
     editedAt  DateTime? // 编辑时间
 
+    // 回复权限控制
+    replySettings String @default("everyone") // 谁可以回复：everyone, following, mentioned, none
+
     // 统计数据（冗余字段，提高查询性能）
     likesCount     Int @default(0) // 点赞数
     retweetsCount  Int @default(0) // 转发数
     repliesCount   Int @default(0) // 回复数
     bookmarksCount Int @default(0) // 收藏数
+    viewsCount     Int @default(0) // 浏览数（推特特有）
+    quotesCount    Int @default(0) // 引用转发数
 
     // 时间戳
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     // 关联关系
-    author      User           @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-    parent      Post?          @relation("PostReplies", fields: [parentId], references: [id])
-    replies     Post[]         @relation("PostReplies")
-    original    Post?          @relation("PostRetweets", fields: [originalId], references: [id])
-    retweetedBy Post[]         @relation("PostRetweets")
-    likes       PostLike[]     @relation("PostLikes")
-    retweets    PostRetweet[]  @relation("PostRetweets")
-    bookmarks   PostBookmark[] @relation("PostBookmarks")
-    media       PostMedia[]    @relation("PostMedia")
-    hashtags    PostHashtag[]  @relation("PostHashtags")
-    mentions    PostMention[]  @relation("PostMentions")
+    author        User           @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+    parent        Post?          @relation("PostReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    replies       Post[]         @relation("PostReplies")
+    replyToUser   User?          @relation("PostReplyToUser", fields: [replyToUserId], references: [id], onDelete: SetNull)
+    conversation  Post?          @relation("ConversationThread", fields: [conversationId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+    threadReplies Post[]         @relation("ConversationThread")
+    original      Post?          @relation("PostRetweets", fields: [originalId], references: [id])
+    retweetedBy   Post[]         @relation("PostRetweets")
+    likes         PostLike[]     @relation("PostLikes")
+    retweets      PostRetweet[]  @relation("PostRetweets")
+    bookmarks     PostBookmark[] @relation("PostBookmarks")
+    media         PostMedia[]    @relation("PostMedia")
+    hashtags      PostHashtag[]  @relation("PostHashtags")
+    mentions      PostMention[]  @relation("PostMentions")
 
     @@index([authorId])
     @@index([parentId])
+    @@index([replyToUserId])
+    @@index([conversationId])
     @@index([originalId])
     @@index([createdAt])
     @@index([isDeleted])
+    @@index([replySettings])
     @@map("posts")
 }
 

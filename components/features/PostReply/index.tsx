@@ -1,8 +1,7 @@
 import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import { PostReplyProps } from "./types";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ReplyTextarea } from "./ReplyTextarea";
 
 /**
@@ -34,10 +33,8 @@ export function PostReply(props: PostReplyProps) {
             </div>
         </DialogTrigger>
         <DialogContent className="w-[750px]">
-            <DialogTitle></DialogTitle>
-            <DialogDescription>
-
-            </DialogDescription>
+            <DialogTitle />
+            <DialogDescription />
             <div className="flex gap-2">
                 <div className="shrink-0 flex flex-col items-center">
                     <Image
@@ -87,7 +84,7 @@ export function PostReply(props: PostReplyProps) {
                     </div>
                 </div>
             </div>
-            <ReplyTextarea post={post}/>
+            <ReplyTextarea post={post} />
         </DialogContent>
     </Dialog>
 }
