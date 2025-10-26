@@ -69,3 +69,29 @@ export const replyPostSchema = z.object({
  * 回复推文DTO
  */
 export type ReplyPostDto = z.infer<typeof replyPostSchema>;
+
+/**
+ * 获取推文回复列表Schema
+ */
+export const getRepliesSchema = z.object({
+    postId: z.string("推文ID不能为空"),
+    pageIndex: z.number("pageIndex不能为空").default(1),
+    pageSize: z.number("pageSize不能为空").default(20)
+});
+
+/**
+ * 获取推文回复列表DTO
+ */
+export type GetRepliesDto = z.infer<typeof getRepliesSchema>;
+
+/**
+ * 获取对话线程Schema
+ */
+export const getConversationThreadSchema = z.object({
+    conversationId: z.string("对话ID不能为空")
+});
+
+/**
+ * 获取对话线程DTO
+ */
+export type GetConversationThreadDto = z.infer<typeof getConversationThreadSchema>;

@@ -10,13 +10,14 @@ import { PostLike } from "@/components/features/PostLike";
 import { PostViews } from "@/components/features/PostViews";
 import { Suspense } from "react";
 import { PostListSkeleton } from "@/components/features/PostList/PostListSkeleton";
+import { PostReplyList } from "@/components/features/PostReplyList";
 
 const AsyncPage = async ({ params }: { params: Promise<{ username: string, post: string }> }) => {
     try {
         const pageParams = await params;
         const { data: post } = await postGetById({ id: pageParams.post });
         if (!post) {
-            return <PostListSkeleton />;
+            return <PostListSkeleton count={1}/>;
         }
         return <>
             <div className="flex items-center gap-3 mb-2">
@@ -57,6 +58,7 @@ const AsyncPage = async ({ params }: { params: Promise<{ username: string, post:
                 <PostLike post={post} />
                 <PostViews post={post} />
             </div>
+
         </>
     } catch (error) {
         return <PostListSkeleton />;
@@ -69,14 +71,15 @@ const AsyncPage = async ({ params }: { params: Promise<{ username: string, post:
  * @returns 
  */
 const Page = async ({ params }: { params: Promise<{ username: string, post: string }> }) => {
-
+    const pageParams = await params;
     return <div className="flex w-[100vw] h-[100vh] box-border overflow-hidden p-0 m-0">
         <NavigationBar />
         <div className="w-[600px] h-[100vh] overflow-hidden flex flex-col box-border flex-shrink-0 border-[#EFF3F4] border-solid border px-3">
             <PostDetailHeader />
-            <Suspense fallback={<PostListSkeleton />}>
+            <Suspense fallback={<PostListSkeleton count={1}/>}>
                 <AsyncPage params={params} />
             </Suspense>
+            <PostReplyList postId={pageParams.post} />
         </div>
         <Sidebar />
     </div>

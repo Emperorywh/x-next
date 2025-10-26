@@ -1,7 +1,7 @@
 'use server';
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
 import { withAuth } from "@/lib/api/auth/auth";
-import { CreatePostDto, createPostSchema, GetPostByIdDto, getPostByIdSchema, ListPostDto, listPostSchema, ReplyPostDto, replyPostSchema, UpdatePostDto, updatePostSchema } from "@/lib/api/post/post.schema";
+import { CreatePostDto, createPostSchema, GetPostByIdDto, getPostByIdSchema, GetRepliesDto, getRepliesSchema, ListPostDto, listPostSchema, ReplyPostDto, replyPostSchema, UpdatePostDto, updatePostSchema } from "@/lib/api/post/post.schema";
 import { PostService } from "@/lib/api/post/post.service";
 import { Post, PostListResponse } from "@/lib/api/post/post.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -180,4 +180,32 @@ export const postReply = withAuth(async (dto: ReplyPostDto): Promise<ApiResponse
             error: JSON.stringify(error)
         })
     }
-})
+});
+
+/**
+ * 获取回复列表
+ */
+export const postReplyList = withAuth(async (dto: GetRepliesDto): Promise<ApiResponse<PostListResponse>> => {
+    try {
+        const validateData = getRepliesSchema.parse(dto);
+        const response = await PostService.getReplies(validateData);
+        return ServiceResponseJson(response);
+    } catch (error) {
+        console.error('未知错误：', error);
+        if (error instanceof ZodError) {
+            const errorInfo = extractZodErrors(error)
+            return ServiceResponseJson({
+                data: null,
+                message: '数据验证失败',
+                success: false,
+                error: errorInfo.errors
+            })
+        }
+        return ServiceResponseJson({
+            data: null,
+            message: '系统错误',
+            success: false,
+            error: JSON.stringify(error)
+        })
+    }
+});

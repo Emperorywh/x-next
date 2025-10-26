@@ -1,4 +1,4 @@
-import { CreatePostDto, createPostSchema, GetPostByIdDto, ListPostDto, listPostSchema, ReplyPostDto, UpdatePostDto, updatePostSchema } from "./post.schema";
+import { CreatePostDto, createPostSchema, GetPostByIdDto, GetRepliesDto, ListPostDto, listPostSchema, ReplyPostDto, UpdatePostDto, updatePostSchema } from "./post.schema";
 import { ServiceResponseJson } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 
@@ -87,6 +87,7 @@ export class PostService {
                 take: validateData.pageSize,
                 orderBy: { createdAt: 'desc' },
                 include: {
+                    // 关联数据
                     author: {
                         select: {
                             id: true,
@@ -203,6 +204,7 @@ export class PostService {
                 id: dto.id
             },
             include: {
+                // 关联数据
                 author: {
                     select: {
                         id: true,
@@ -215,6 +217,33 @@ export class PostService {
                         followingCount: true
                     }
                 },
+                // 回复给的用户信息
+                replyToUser: {
+                    select: {
+                        id: true,
+                        name: true,
+                        username: true,
+                        image: true,
+                        verified: true
+                    }
+                },
+                // 父推文信息（如果是回复）
+                parent: {
+                    select: {
+                        id: true,
+                        content: true,
+                        authorId: true,
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
+                                username: true,
+                                image: true,
+                                verified: true
+                            }
+                        }
+                    }
+                }
             }
         });
         if (result) {
@@ -261,20 +290,198 @@ export class PostService {
                 success: false,
             });
         }
-        const result = await prisma.post.create({
-            data: {
-                content: dto.content,
-                parentId: findPost.id,
-                replyToUserId: findPost.authorId,
-                conversationId: findPost.id,
-                authorId: user.id,
-                replyDepth: dto.replyDepth
-            }
+
+        // 使用事务确保数据一致性
+        const result = await prisma.$transaction(async (tx) => {
+            // 创建回复推文
+            const newReply = await tx.post.create({
+                data: {
+                    content: dto.content,
+                    parentId: findPost.id,
+                    replyToUserId: findPost.authorId,
+                    conversationId: findPost.conversationId || findPost.id, // 如果是回复的回复，使用原始conversationId
+                    authorId: user.id,
+                    replyDepth: findPost.replyDepth + 1
+                }
+            });
+
+            // 更新父推文的回复数（只统计直接回复）
+            await tx.post.update({
+                where: { id: findPost.id },
+                data: {
+                    repliesCount: {
+                        increment: 1
+                    }
+                }
+            });
+
+            return newReply;
         });
+
         return ServiceResponseJson({
             data: result,
             message: "回复成功",
             success: true
         })
+    }
+
+    /**
+     * 获取推文的回复列表
+     * @param postId 推文ID
+     * @param pageIndex 页码
+     * @param pageSize 每页数量
+     */
+    static async getReplies(dto: GetRepliesDto) {
+        const { postId, pageIndex, pageSize } = dto;
+        if (!postId) {
+            return ServiceResponseJson({
+                data: null,
+                message: '请传入推文ID',
+                success: false,
+            });
+        }
+
+        // 计算分页参数
+        const skip = (pageIndex - 1) * pageSize;
+
+        // 并行查询回复列表和总数
+        const [replies, total] = await Promise.all([
+            prisma.post.findMany({
+                where: {
+                    parentId: postId,
+                    isDeleted: false
+                },
+                skip: skip,
+                take: pageSize,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    // 关联数据
+                    author: {
+                        select: {
+                            id: true,
+                            name: true,
+                            username: true,
+                            image: true,
+                            verified: true,
+                            bio: true
+                        }
+                    },
+                    replyToUser: {
+                        select: {
+                            id: true,
+                            name: true,
+                            username: true,
+                            verified: true
+                        }
+                    }
+                }
+            }),
+            prisma.post.count({
+                where: {
+                    parentId: postId,
+                    isDeleted: false
+                }
+            })
+        ]);
+
+        // 计算分页信息
+        const totalPages = Math.ceil(total / pageSize);
+        const hasNextPage = pageIndex < totalPages;
+        const hasPrevPage = pageIndex > 1;
+
+        return ServiceResponseJson({
+            data: {
+                list: replies,
+                pagination: {
+                    pageIndex: pageIndex,
+                    pageSize: pageSize,
+                    total: total,
+                    totalPages: totalPages,
+                    hasNextPage: hasNextPage,
+                    hasPrevPage: hasPrevPage
+                }
+            },
+            message: "查询成功",
+            success: true
+        });
+    }
+
+    /**
+     * 获取整个对话线程
+     * @param conversationId 对话线程ID（根推文ID）
+     */
+    static async getConversationThread(conversationId: string) {
+        if (!conversationId) {
+            return ServiceResponseJson({
+                data: null,
+                message: '请传入对话ID',
+                success: false,
+            });
+        }
+
+        // 获取根推文
+        const rootPost = await prisma.post.findUnique({
+            where: { id: conversationId },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        name: true,
+                        username: true,
+                        image: true,
+                        verified: true
+                    }
+                }
+            }
+        });
+
+        if (!rootPost) {
+            return ServiceResponseJson({
+                data: null,
+                message: '未找到该对话',
+                success: false,
+            });
+        }
+
+        // 获取该对话的所有回复
+        const replies = await prisma.post.findMany({
+            where: {
+                conversationId: conversationId,
+                isDeleted: false
+            },
+            orderBy: [
+                { replyDepth: 'asc' },
+                { createdAt: 'asc' }
+            ],
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        name: true,
+                        username: true,
+                        image: true,
+                        verified: true
+                    }
+                },
+                replyToUser: {
+                    select: {
+                        id: true,
+                        name: true,
+                        username: true,
+                        verified: true
+                    }
+                }
+            }
+        });
+
+        return ServiceResponseJson({
+            data: {
+                rootPost: rootPost,
+                replies: replies,
+                totalReplies: replies.length
+            },
+            message: "查询成功",
+            success: true
+        });
     }
 }

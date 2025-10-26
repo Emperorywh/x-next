@@ -60,7 +60,7 @@ export const PostItem = ({ post }: { post: Post }) => {
                         </div>
                     </div>
                 </div>
-                <Link href={`${post?.author?.username}/status/${post.id}`}>
+                <Link href={`/${post?.author?.username}/status/${post.id}`}>
                     <div
                         className="mb-2 text-[#0F1419] whitespace-pre-wrap break-words overflow-hidden"
                         style={{
