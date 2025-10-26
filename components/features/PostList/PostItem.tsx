@@ -6,6 +6,7 @@ import { PostReply } from "../PostReply";
 import { PostForward } from "../PostForward";
 import { PostViews } from "../PostViews";
 import { PostLike } from "../PostLike";
+import { PersonalInfomationHover } from "../PersonalInfomationHover";
 
 /**
  * 单个帖子组件
@@ -30,24 +31,30 @@ export const PostItem = ({ post }: { post: Post }) => {
     return (
         <div className="flex gap-2 border-b-1 p-4 hover:bg-gray-50 transition-colors">
             <div className="shrink-0">
-                <Image
-                    src={post?.author?.image || ''}
-                    alt={`${post.author.username} 头像`}
-                    width={40}
-                    height={40}
-                    className='rounded-full'
-                />
+                <PersonalInfomationHover user={post.author}>
+                    <Image
+                        src={post?.author?.image || ''}
+                        alt={`${post.author.username} 头像`}
+                        width={40}
+                        height={40}
+                        className='rounded-full cursor-pointer'
+                    />
+                </PersonalInfomationHover>
             </div>
             <div className="grow">
                 <div className="mb-2">
                     <div className="flex items-center gap-3">
-                        <span className="font-bold">
-                            {post?.author?.name || post?.author?.username}
-                        </span>
-                        <span className="text-gray-400">
-                            @{post?.author?.username}
-                        </span>
-                        <div className="text-gray-400 flex items-center gap-2">
+                        <PersonalInfomationHover user={post.author}>
+                            <span className="font-bold cursor-pointer hover:border-b-1 border-black  box-border  h-[24px]">
+                                {post?.author?.name || post?.author?.username}
+                            </span>
+                        </PersonalInfomationHover>
+                        <PersonalInfomationHover user={post.author}>
+                            <span className="text-gray-400 cursor-pointer  h-[24px]">
+                                @{post?.author?.username}
+                            </span>
+                        </PersonalInfomationHover>
+                        <div className="text-gray-400 flex items-center gap-2  h-[24px]">
                             <span>·</span>
                             <span className="text-[14px]">
                                 {formattedTime}
@@ -73,6 +80,6 @@ export const PostItem = ({ post }: { post: Post }) => {
                     <PostViews post={post} />
                 </div>
             </div>
-        </div>
+        </div >
     );
 };

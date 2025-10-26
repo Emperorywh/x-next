@@ -1,14 +1,4 @@
-
-/**
- * 帖子作者信息
- */
-export interface PostAuthor {
-    id: string;
-    name: string | null;
-    username: string;
-    image: string | null;
-    verified: boolean;
-}
+import { User } from "../user/user.types";
 
 /**
  * 帖子信息
@@ -29,7 +19,7 @@ export interface Post {
     bookmarksCount: number;
     createdAt: Date;
     updatedAt: Date;
-    author: PostAuthor;
+    author: User;
 }
 
 /**

@@ -92,7 +92,10 @@ export class PostService {
                             name: true,
                             username: true,
                             image: true,
-                            verified: true
+                            verified: true,
+                            bio: true,
+                            followersCount: true,
+                            followingCount: true
                         }
                     },
                 }
