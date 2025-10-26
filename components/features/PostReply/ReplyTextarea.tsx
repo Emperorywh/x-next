@@ -7,23 +7,48 @@ import { ImagePlus, Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { EmojiPickerCustomer } from "../EmojiPickerCustomer";
 import { Button } from "@/components/ui/button";
+import { postReply } from "@/app/actions/post/post.action";
+import { toast } from "sonner";
 
 export function ReplyTextarea(props: ReplyTextareaProps) {
 
+    const { post, onSuccess } = props;
     const [textValue, setTextValue] = useState('');
 
     const [loading, setLoading] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    const handleReplay = () => {
+    const handleReplay = async () => {
+        try {
+            setLoading(true);
+            const response = await postReply({
+                authorId: "",
+                content: textValue,
+                parentId: post.id,
+                replyToUserId: post.authorId,
+                conversationId: post.id,
+                replyDepth: 1
+            });
+            if (response.success) {
+                toast.success("回复成功");
+                onSuccess?.();
+            } else {
+                toast.error(response.message);
+            }
+        } catch (error) {
 
+        } finally {
+            setLoading(false);
+        }
     }
+
+    const loginUser = JSON.parse(localStorage.getItem("LOGIN_USER") || "{}");
 
     return <div className='flex'>
         <div className="mr-1 shrink-0">
             <Image
-                src="https://pbs.twimg.com/profile_images/1979028593091956736/6ix-9yak_400x400.jpg"
+                src={loginUser?.image}
                 alt='头像'
                 width={40}
                 height={40}

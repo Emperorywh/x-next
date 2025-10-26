@@ -1,4 +1,4 @@
-import { CreatePostDto, createPostSchema, GetPostByIdDto, ListPostDto, listPostSchema, UpdatePostDto, updatePostSchema } from "./post.schema";
+import { CreatePostDto, createPostSchema, GetPostByIdDto, ListPostDto, listPostSchema, ReplyPostDto, UpdatePostDto, updatePostSchema } from "./post.schema";
 import { ServiceResponseJson } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 
@@ -55,6 +55,7 @@ export class PostService {
         // 构建搜索条件
         const whereCondition: any = {
             isDeleted: false, // 只查询未删除的帖子
+            replyDepth: 0
         };
 
         // 按作者名称搜索
@@ -229,5 +230,51 @@ export class PostService {
                 success: false,
             });
         }
+    }
+
+    /**
+     * 回复推文
+     * @param dto 
+     */
+    static async reply(dto: ReplyPostDto) {
+        const findPost = await prisma.post.findUnique({
+            where: {
+                id: dto.parentId
+            }
+        });
+        if (!findPost) {
+            return ServiceResponseJson({
+                data: null,
+                message: '未找到该推文',
+                success: false,
+            });
+        }
+        const user = await prisma.user.findFirst({
+            where: {
+                id: dto.authorId
+            }
+        });
+        if (!user) {
+            return ServiceResponseJson({
+                data: undefined,
+                message: "用户信息不存在",
+                success: false,
+            });
+        }
+        const result = await prisma.post.create({
+            data: {
+                content: dto.content,
+                parentId: findPost.id,
+                replyToUserId: findPost.authorId,
+                conversationId: findPost.id,
+                authorId: user.id,
+                replyDepth: dto.replyDepth
+            }
+        });
+        return ServiceResponseJson({
+            data: result,
+            message: "回复成功",
+            success: true
+        })
     }
 }

@@ -52,3 +52,20 @@ export const getPostByIdSchema = z.object({
  * 根据帖子ID查询帖子信息Dto
  */
 export type GetPostByIdDto = z.infer<typeof getPostByIdSchema>;
+
+/**
+ * 回复推文Schema
+ */
+export const replyPostSchema = z.object({
+    authorId: z.string("authorId不能为空"),
+    content: z.string("content不能为空"),
+    parentId: z.string("parentId不能为空"),
+    replyToUserId: z.string("replyToUserId不能为空"),
+    conversationId: z.string("conversationId不能为空"),
+    replyDepth: z.number("replyDepth不能为空")
+});
+
+/**
+ * 回复推文DTO
+ */
+export type ReplyPostDto = z.infer<typeof replyPostSchema>;

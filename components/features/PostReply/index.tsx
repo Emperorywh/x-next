@@ -1,14 +1,20 @@
+'use client';
 import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import { PostReplyProps } from "./types";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ReplyTextarea } from "./ReplyTextarea";
+import { useState } from "react";
 
 /**
  * 回复帖子
  */
 export function PostReply(props: PostReplyProps) {
+
     const { post } = props;
+
+    const [open, setOpen] = useState(false);
+
     // 格式化时间显示
     const formattedTime = () => {
         const now = new Date();
@@ -25,7 +31,8 @@ export function PostReply(props: PostReplyProps) {
             day: 'numeric'
         });
     };
-    return <Dialog>
+
+    return <Dialog open={open} onOpenChange={value => setOpen(value)}>
         <DialogTrigger asChild>
             <div className="flex items-center gap-1 cursor-pointer text-[#536471] hover:text-[#1D9BF0] transition-colors">
                 <MessageCircle className="w-[35px] h-[35px] text-current transition-colors hover:bg-[#E8F5FD] p-2 rounded-full" />
@@ -84,7 +91,7 @@ export function PostReply(props: PostReplyProps) {
                     </div>
                 </div>
             </div>
-            <ReplyTextarea post={post} />
+            <ReplyTextarea post={post} onSuccess={() => { setOpen(false) }} />
         </DialogContent>
     </Dialog>
 }

@@ -30,17 +30,15 @@ export const PostItem = ({ post }: { post: Post }) => {
     }, [post.createdAt]);
     return (
         <div className="flex gap-2 border-b-1 p-4 hover:bg-gray-50 transition-colors cursor-pointer">
-            <div className="shrink-0">
-                <PersonalInfomationHover user={post.author}>
-                    <Image
-                        src={post?.author?.image || ''}
-                        alt={`${post.author.username} 头像`}
-                        width={40}
-                        height={40}
-                        className='rounded-full cursor-pointer'
-                    />
-                </PersonalInfomationHover>
-            </div>
+            <PersonalInfomationHover user={post.author}>
+                <Image
+                    src={post?.author?.image || ''}
+                    alt={`${post.author.username} 头像`}
+                    width={40}
+                    height={40}
+                    className='shrink-0 rounded-full cursor-pointer w-[40px] h-[40px]'
+                />
+            </PersonalInfomationHover>
             <div className="grow">
                 <div className="mb-2">
                     <div className="flex items-center gap-3">

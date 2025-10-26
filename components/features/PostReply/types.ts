@@ -5,5 +5,6 @@ export interface PostReplyProps {
 }
 
 export interface ReplyTextareaProps {
-    post: Post
+    post: Post;
+    onSuccess?: () => void;
 }

@@ -26,7 +26,7 @@ const AsyncPage = async ({ params }: { params: Promise<{ username: string, post:
                         height={40}
                         alt={post.author.username}
                         src={post.author.image || ''}
-                        className="rounded-full cursor-pointer"
+                        className="rounded-full cursor-pointer w-[40px] h-[40px]"
                     />
                 </PersonalInfomationHover>
                 <PersonalInfomationHover user={post.author}>
