@@ -1,7 +1,7 @@
 'use server';
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
 import { withAuth } from "@/lib/api/auth/auth";
-import { getUserInfoSchema, GetUserInfoSchemaDto, loginSchema, registerSchema, UserLoginDto, UserRegisterDto } from "@/lib/api/user/user.schema";
+import { getUserInfoByUsernameSchema, getUserInfoSchema, GetUserInfoSchemaDto, GetUserInfoUsernameSchemaDto, loginSchema, registerSchema, UserLoginDto, UserRegisterDto } from "@/lib/api/user/user.schema";
 import { UserService } from "@/lib/api/user/user.service";
 import { User } from "@/lib/api/user/user.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -88,6 +88,25 @@ export const userGetInfoById = withAuth(async (idDto: GetUserInfoSchemaDto): Pro
         // 验证路径参数
         const validationResult = getUserInfoSchema.parse(idDto);
         const response = await UserService.getUserInfoById(validationResult);
+        return ServiceResponseJson(response);
+    } catch (error) {
+        return ServiceResponseJson({
+            data: null,
+            message: '系统错误',
+            success: false,
+            error: JSON.stringify(error)
+        })
+    }
+});
+
+/**
+ * 根据username查询用户信息
+ */
+export const userGetInfoByUsername = withAuth(async (usernameDto: GetUserInfoUsernameSchemaDto): Promise<ApiResponse<User>> => {
+    try {
+        // 验证路径参数
+        const validationResult = getUserInfoByUsernameSchema.parse(usernameDto);
+        const response = await UserService.getUserInfoByUsername(validationResult);
         return ServiceResponseJson(response);
     } catch (error) {
         return ServiceResponseJson({

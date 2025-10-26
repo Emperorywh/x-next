@@ -1,7 +1,7 @@
 'use server';
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
 import { withAuth } from "@/lib/api/auth/auth";
-import { CreatePostDto, createPostSchema, ListPostDto, listPostSchema, UpdatePostDto, updatePostSchema } from "@/lib/api/post/post.schema";
+import { CreatePostDto, createPostSchema, GetPostByIdDto, getPostByIdSchema, ListPostDto, listPostSchema, UpdatePostDto, updatePostSchema } from "@/lib/api/post/post.schema";
 import { PostService } from "@/lib/api/post/post.service";
 import { Post, PostListResponse } from "@/lib/api/post/post.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -118,4 +118,32 @@ export const postUpdate = withAuth(async (updatePostDto: UpdatePostDto, userId: 
             error: JSON.stringify(error)
         })
     }
-})
+});
+
+/**
+ * 根据帖子ID 查询帖子
+ */
+export const postGetById = withAuth(async (dto: GetPostByIdDto): Promise<ApiResponse<Post>> => {
+    try {
+        const validateData = getPostByIdSchema.parse(dto);
+        const response = await PostService.getPostById(validateData);
+        return ServiceResponseJson(response);
+    } catch (error) {
+        console.error('未知错误：', error);
+        if (error instanceof ZodError) {
+            const errorInfo = extractZodErrors(error)
+            return ServiceResponseJson({
+                data: null,
+                message: '数据验证失败',
+                success: false,
+                error: errorInfo.errors
+            })
+        }
+        return ServiceResponseJson({
+            data: null,
+            message: '系统错误',
+            success: false,
+            error: JSON.stringify(error)
+        })
+    }
+});

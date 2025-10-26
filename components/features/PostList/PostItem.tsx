@@ -1,5 +1,4 @@
 import { Post } from "@/lib/api/post/post.types";
-import { ChartNoAxesColumnIncreasing, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import Image from 'next/image';
 import { useMemo } from "react";
 import { PostReply } from "../PostReply";
@@ -7,6 +6,7 @@ import { PostForward } from "../PostForward";
 import { PostViews } from "../PostViews";
 import { PostLike } from "../PostLike";
 import { PersonalInfomationHover } from "../PersonalInfomationHover";
+import Link from "next/link";
 
 /**
  * 单个帖子组件
@@ -29,57 +29,59 @@ export const PostItem = ({ post }: { post: Post }) => {
         });
     }, [post.createdAt]);
     return (
-        <div className="flex gap-2 border-b-1 p-4 hover:bg-gray-50 transition-colors">
-            <div className="shrink-0">
-                <PersonalInfomationHover user={post.author}>
-                    <Image
-                        src={post?.author?.image || ''}
-                        alt={`${post.author.username} 头像`}
-                        width={40}
-                        height={40}
-                        className='rounded-full cursor-pointer'
-                    />
-                </PersonalInfomationHover>
-            </div>
-            <div className="grow">
-                <div className="mb-2">
-                    <div className="flex items-center gap-3">
-                        <PersonalInfomationHover user={post.author}>
-                            <span className="font-bold cursor-pointer hover:border-b-1 border-black  box-border  h-[24px]">
-                                {post?.author?.name || post?.author?.username}
-                            </span>
-                        </PersonalInfomationHover>
-                        <PersonalInfomationHover user={post.author}>
-                            <span className="text-gray-400 cursor-pointer  h-[24px]">
-                                @{post?.author?.username}
-                            </span>
-                        </PersonalInfomationHover>
-                        <div className="text-gray-400 flex items-center gap-2  h-[24px]">
-                            <span>·</span>
-                            <span className="text-[14px]">
-                                {formattedTime}
-                            </span>
+        <Link href={`${post?.author?.username}/status/${post.id}`}>
+            <div className="flex gap-2 border-b-1 p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                <div className="shrink-0">
+                    <PersonalInfomationHover user={post.author}>
+                        <Image
+                            src={post?.author?.image || ''}
+                            alt={`${post.author.username} 头像`}
+                            width={40}
+                            height={40}
+                            className='rounded-full cursor-pointer'
+                        />
+                    </PersonalInfomationHover>
+                </div>
+                <div className="grow">
+                    <div className="mb-2">
+                        <div className="flex items-center gap-3">
+                            <PersonalInfomationHover user={post.author}>
+                                <span className="font-bold cursor-pointer hover:border-b-1 border-black  box-border  h-[24px]">
+                                    {post?.author?.name || post?.author?.username}
+                                </span>
+                            </PersonalInfomationHover>
+                            <PersonalInfomationHover user={post.author}>
+                                <span className="text-gray-400 cursor-pointer  h-[24px]">
+                                    @{post?.author?.username}
+                                </span>
+                            </PersonalInfomationHover>
+                            <div className="text-gray-400 flex items-center gap-2  h-[24px]">
+                                <span>·</span>
+                                <span className="text-[14px]">
+                                    {formattedTime}
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <div
+                        className="mb-2 text-[#0F1419] whitespace-pre-wrap break-words overflow-hidden"
+                        style={{
+                            display: '-webkit-box',
+                            WebkitBoxOrient: 'vertical',
+                            wordBreak: 'break-all',
+                            overflowWrap: 'anywhere',
+                        }}
+                    >
+                        {post.content}
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <PostReply post={post} />
+                        <PostForward post={post} />
+                        <PostLike post={post} />
+                        <PostViews post={post} />
+                    </div>
                 </div>
-                <div
-                    className="mb-2 text-[#0F1419] whitespace-pre-wrap break-words overflow-hidden"
-                    style={{
-                        display: '-webkit-box',
-                        WebkitBoxOrient: 'vertical',
-                        wordBreak: 'break-all',
-                        overflowWrap: 'anywhere',
-                    }}
-                >
-                    {post.content}
-                </div>
-                <div className="flex items-center justify-between">
-                    <PostReply post={post} />
-                    <PostForward post={post} />
-                    <PostLike post={post} />
-                    <PostViews post={post} />
-                </div>
-            </div>
-        </div >
+            </div >
+        </Link>
     );
 };

@@ -1,4 +1,4 @@
-import { getUserInfoSchema, GetUserInfoSchemaDto, registerSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
+import { getUserInfoByUsernameSchema, getUserInfoSchema, GetUserInfoSchemaDto, GetUserInfoUsernameSchemaDto, registerSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
 import { formatLocalDateTime, hashPassword, verifyPassword } from "@/lib/utils";
 import { ServiceResponseJson } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
@@ -170,6 +170,37 @@ export class UserService {
         return ServiceResponseJson({
             data: null,
             message: "用户ID错误",
+            success: true
+        });
+    }
+
+    /**
+     * 根据username查询用户信息
+     * @param idDto 
+     * @returns 
+     */
+    static async getUserInfoByUsername(usernameDto: GetUserInfoUsernameSchemaDto) {
+        // 验证路径参数
+        const validationResult = getUserInfoByUsernameSchema.parse(usernameDto);
+
+        const user = await prisma.user.findFirst({
+            where: {
+                username: validationResult.username
+            },
+        });
+        if (user) {
+            return ServiceResponseJson({
+                data: {
+                    ...user,
+                    password: undefined
+                },
+                message: "获取成功",
+                success: true
+            });
+        }
+        return ServiceResponseJson({
+            data: null,
+            message: "username错误",
             success: true
         });
     }

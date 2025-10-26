@@ -1,4 +1,4 @@
-import { CreatePostDto, createPostSchema, ListPostDto, listPostSchema, UpdatePostDto, updatePostSchema } from "./post.schema";
+import { CreatePostDto, createPostSchema, GetPostByIdDto, ListPostDto, listPostSchema, UpdatePostDto, updatePostSchema } from "./post.schema";
 import { ServiceResponseJson } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 
@@ -183,5 +183,51 @@ export class PostService {
             message: "修改成功",
             success: true,
         });
+    }
+
+    /**
+     * 根据帖子Id查询帖子信息
+     * @param dto 
+     */
+    static async getPostById(dto: GetPostByIdDto) {
+        if (!dto?.id) {
+            return ServiceResponseJson({
+                data: null,
+                message: '请传入帖子ID',
+                success: false,
+            });
+        }
+        const result = await prisma.post.findUnique({
+            where: {
+                id: dto.id
+            },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        name: true,
+                        username: true,
+                        image: true,
+                        verified: true,
+                        bio: true,
+                        followersCount: true,
+                        followingCount: true
+                    }
+                },
+            }
+        });
+        if (result) {
+            return ServiceResponseJson({
+                data: result,
+                message: "查询成功",
+                success: true,
+            });
+        } else {
+            return ServiceResponseJson({
+                data: result,
+                message: "查询失败",
+                success: false,
+            });
+        }
     }
 }

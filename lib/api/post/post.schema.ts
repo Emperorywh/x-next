@@ -40,3 +40,15 @@ export const updatePostSchema = z.object({
  * 更新帖子DTO
  */
 export type UpdatePostDto = z.infer<typeof updatePostSchema>;
+
+/**
+ * 根据帖子ID查询帖子信息Schema
+ */
+export const getPostByIdSchema = z.object({
+    id: z.string("帖子ID不能为空"),
+});
+
+/**
+ * 根据帖子ID查询帖子信息Dto
+ */
+export type GetPostByIdDto = z.infer<typeof getPostByIdSchema>;
