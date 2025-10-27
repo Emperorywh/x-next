@@ -26,10 +26,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
 	children,
-	modal
+	modal,
+	profile
 }: Readonly<{
 	children: React.ReactNode;
-	modal: React.ReactNode
+	modal: React.ReactNode;
+	profile: React.ReactNode
 }>) {
 	return (
 		<html lang="zh" className={inter.className}>
@@ -38,6 +40,7 @@ export default function RootLayout({
 			>
 				{children}
 				{modal}
+				{profile}
 				<Toaster position="top-center" />
 			</body>
 		</html>

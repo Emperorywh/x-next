@@ -7,6 +7,7 @@ import { PostListSkeleton } from "@/components/features/PostList/PostListSkeleto
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { CalendarDays } from "lucide-react";
+import Link from "next/link";
 /**
  * 个人资料
  * @returns 
@@ -50,9 +51,11 @@ const PageAsync = async ({ params }: { params: Promise<{ username: string }> }) 
                         />
                     </div>
                     <div className="flex items-center justify-end mt-2 pr-3">
-                        <Button variant="outline" className="w-[124px] h-[36px] rounded-full text-xm cursor-pointer">
-                            编辑个人资料
-                        </Button>
+                        <Link href="/setting/profile">
+                            <Button variant="outline" className="w-[124px] h-[36px] rounded-full text-xm cursor-pointer">
+                                编辑个人资料
+                            </Button>
+                        </Link>
                     </div>
                 </div>
                 <div className="px-[16px]">

@@ -7,6 +7,7 @@ import { User } from "@/lib/api/user/user.types";
 import { extractZodErrors } from "@/lib/utils";
 import z from "zod";
 import { sleep } from "../post/post.action";
+import { cookies, headers } from "next/headers";
 
 /**
 * 用户注册
@@ -108,6 +109,28 @@ export const userGetInfoByUsername = withAuth(async (usernameDto: GetUserInfoUse
         // 验证路径参数
         const validationResult = getUserInfoByUsernameSchema.parse(usernameDto);
         const response = await UserService.getUserInfoByUsername(validationResult);
+        await sleep(2000);
+        return ServiceResponseJson(response);
+    } catch (error) {
+        return ServiceResponseJson({
+            data: null,
+            message: '系统错误',
+            success: false,
+            error: JSON.stringify(error)
+        })
+    }
+});
+
+/**
+ * 根据header信息查询用信息
+ */
+export const userGetInfoByHeader = withAuth(async (): Promise<ApiResponse<User>> => {
+    try {
+        const header = await headers();
+        const userId = header.get("x-user-id");
+        const response = await UserService.getUserInfoById({
+            id: userId || ''
+        });
         await sleep(2000);
         return ServiceResponseJson(response);
     } catch (error) {
