@@ -46,7 +46,7 @@ export const postCreate = withAuth(async (createPostDto: CreatePostDto, userId: 
     }
 })
 
-const sleep = (time = 3000) => {
+export const sleep = async (time = 3000) => {
     return new Promise<void>((resolve) => {
         setTimeout(() => {
             resolve();

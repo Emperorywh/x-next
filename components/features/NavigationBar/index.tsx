@@ -1,5 +1,6 @@
 import { IconBookMarks, IconCommunitity, IconGork, IconHome, IconList, IconMessage, IconMore, IconNotification, IconPersonal, IconPost, IconSearch, IconX } from "@/components/features/Icon";
 import Link from "next/link";
+import { LinkPersonal } from "../LinkPersonal";
 
 export default function NavigationBar() {
     return <div className="grow shrink-0 overflow-hidden flex justify-end ">
@@ -91,16 +92,7 @@ export default function NavigationBar() {
                     </div>
                 </div>
             </Link>
-            <Link href="/personal">
-                <div className="w-[259px] cursor-pointer">
-                    <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">
-                        <IconPersonal />
-                        <span>
-                            个人资料
-                        </span>
-                    </div>
-                </div>
-            </Link>
+            <LinkPersonal />
             <Link href="/post">
                 <div className="w-[259px] cursor-pointer">
                     <div className="h-[50px] inline-flex items-center px-5 gap-5 hover:bg-gray-200 rounded-full">

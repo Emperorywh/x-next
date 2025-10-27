@@ -6,6 +6,7 @@ import { UserService } from "@/lib/api/user/user.service";
 import { User } from "@/lib/api/user/user.types";
 import { extractZodErrors } from "@/lib/utils";
 import z from "zod";
+import { sleep } from "../post/post.action";
 
 /**
 * 用户注册
@@ -107,6 +108,7 @@ export const userGetInfoByUsername = withAuth(async (usernameDto: GetUserInfoUse
         // 验证路径参数
         const validationResult = getUserInfoByUsernameSchema.parse(usernameDto);
         const response = await UserService.getUserInfoByUsername(validationResult);
+        await sleep(2000);
         return ServiceResponseJson(response);
     } catch (error) {
         return ServiceResponseJson({
