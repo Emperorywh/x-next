@@ -3,11 +3,11 @@ import Sidebar from "@/components/features/Sidebar";
 import { UsernameHeader } from "./UsernameHeader";
 import { userGetInfoByUsername } from "../actions/user/user.action";
 import { Suspense } from "react";
-import { PostListSkeleton } from "@/components/features/PostList/PostListSkeleton";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { CalendarDays } from "lucide-react";
 import Link from "next/link";
+import PageAsyncSkeleton from "./PageAsyncSkeleton";
 /**
  * 个人资料
  * @returns 
@@ -16,7 +16,7 @@ const Page = async ({ params }: { params: Promise<{ username: string }> }) => {
     return <div className="flex w-[100vw] h-[100vh] box-border overflow-hidden p-0 m-0">
         <NavigationBar />
         <div className="w-[600px] h-[100vh] overflow-hidden flex flex-col box-border flex-shrink-0 border-[#EFF3F4] border-solid border">
-            <Suspense fallback={<PostListSkeleton count={1} />}>
+            <Suspense fallback={<PageAsyncSkeleton />}>
                 <PageAsync params={params} />
             </Suspense>
         </div>

@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Input } from "@/components/ui/input";
+import ModalSkeleton from "./ModalSkeleton";
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -90,27 +91,30 @@ export default function PostModal() {
                 <DialogTitle>
                 </DialogTitle>
             </VisuallyHidden>
-            <div>
-                <div className="flex items-center justify-between px-6 h-[50px] overflow-hidden sticky top-0 z-999 bg-[#ffffffd9] backdrop-blur-sm">
-                    <DialogClose>
-                        <div className="flex items-center justify-center w-[36px] h-[36px] rounded-full hover:bg-zinc-200 cursor-pointer shrink-0 mr-10">
-                            <X className="w-[20px] h-[20px]" />
+            {loading ? (
+                <ModalSkeleton />
+            ) : (
+                <div>
+                    <div className="flex items-center justify-between px-6 h-[50px] overflow-hidden sticky top-0 z-999 bg-[#ffffffd9] backdrop-blur-sm">
+                        <DialogClose>
+                            <div className="flex items-center justify-center w-[36px] h-[36px] rounded-full hover:bg-zinc-200 cursor-pointer shrink-0 mr-10">
+                                <X className="w-[20px] h-[20px]" />
+                            </div>
+                        </DialogClose>
+                        <div className="grow font-bold">
+                            编辑个人资料
                         </div>
-                    </DialogClose>
-                    <div className="grow font-bold">
-                        编辑个人资料
+                        <Button className="shrink-0 cursor-pointer rounded-full" onClick={async () => {
+                            const validate = await form.trigger();
+                            if (!validate) return;
+                            const values = form.getValues();
+                            onSubmit(values);
+                        }}>
+                            保存
+                        </Button>
                     </div>
-                    <Button className="shrink-0 cursor-pointer rounded-full" onClick={async () => {
-                        const validate = await form.trigger();
-                        if (!validate) return;
-                        const values = form.getValues();
-                        onSubmit(values);
-                    }}>
-                        保存
-                    </Button>
-                </div>
-                {
-                    userInfo && <div className="relative">
+                    {
+                        userInfo && <div className="relative">
                         <div className="relative">
                             <div className="relative">
                                 <Image
@@ -222,7 +226,8 @@ export default function PostModal() {
                         </div>
                     </div>
                 }
-            </div>
+                </div>
+            )}
         </DialogContent>
     </Dialog>
 }
