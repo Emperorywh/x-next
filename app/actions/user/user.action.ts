@@ -1,7 +1,7 @@
 'use server';
 import { ApiResponse, ServiceResponseJson } from "@/lib/api-response";
 import { withAuth } from "@/lib/api/auth/auth";
-import { getUserInfoByUsernameSchema, getUserInfoSchema, GetUserInfoSchemaDto, GetUserInfoUsernameSchemaDto, loginSchema, registerSchema, UserLoginDto, UserRegisterDto } from "@/lib/api/user/user.schema";
+import { getUserInfoByUsernameSchema, getUserInfoSchema, GetUserInfoSchemaDto, GetUserInfoUsernameSchemaDto, loginSchema, registerSchema, UpdateUserInfoDto, UserLoginDto, UserRegisterDto } from "@/lib/api/user/user.schema";
 import { UserService } from "@/lib/api/user/user.service";
 import { User } from "@/lib/api/user/user.types";
 import { extractZodErrors } from "@/lib/utils";
@@ -141,4 +141,27 @@ export const userGetInfoByHeader = withAuth(async (): Promise<ApiResponse<User>>
             error: JSON.stringify(error)
         })
     }
-})
+});
+
+/**
+ * 更新用户信息
+ */
+export const userUpdateInfo = withAuth(async (dto: Omit<UpdateUserInfoDto, 'id'>): Promise<ApiResponse<User>> => {
+    try {
+        const header = await headers();
+        const userId = header.get("x-user-id");
+        const response = await UserService.updateUserInfo({
+            id: userId || '',
+            ...dto
+        });
+        await sleep(2000);
+        return ServiceResponseJson(response);
+    } catch (error) {
+        return ServiceResponseJson({
+            data: null,
+            message: '系统错误',
+            success: false,
+            error: JSON.stringify(error)
+        })
+    }
+});

@@ -87,3 +87,31 @@ export const getUserInfoByUsernameSchema = z.object({
  * 根据username取用户信息DTO
  */
 export type GetUserInfoUsernameSchemaDto = z.infer<typeof getUserInfoByUsernameSchema>;
+
+/**
+ * 更新用户信息schema
+ */
+export const updateUserInfoSchema = z.object({
+    id: z.string().min(1, "用户ID不能为空"),
+    name: z.string().min(2, {
+        message: "名称至少两位",
+    }),
+    bio: z.string().optional(),
+    location: z.string().optional(),
+    website: z.string().optional(),
+    image: z.string().optional(),
+    coverImage: z.string().optional(),
+    birthDate: z
+        .string()
+        .refine((date) => {
+            const birthDate = new Date(date)
+            const today = new Date()
+            const age = today.getFullYear() - birthDate.getFullYear()
+            return age >= 18 && age <= 200
+        }, "年龄必须在18-200岁之间"),
+});
+
+/**
+ * 更新用户信息DTO
+ */
+export type UpdateUserInfoDto = z.infer<typeof updateUserInfoSchema>;

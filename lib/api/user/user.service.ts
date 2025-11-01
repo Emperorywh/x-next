@@ -1,4 +1,4 @@
-import { getUserInfoByUsernameSchema, getUserInfoSchema, GetUserInfoSchemaDto, GetUserInfoUsernameSchemaDto, registerSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
+import { getUserInfoByUsernameSchema, getUserInfoSchema, GetUserInfoSchemaDto, GetUserInfoUsernameSchemaDto, registerSchema, UpdateUserInfoDto, updateUserInfoSchema, UserLoginDto, UserRegisterDto } from "./user.schema";
 import { formatLocalDateTime, hashPassword, verifyPassword } from "@/lib/utils";
 import { ServiceResponseJson } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
@@ -202,6 +202,44 @@ export class UserService {
             data: null,
             message: "username错误",
             success: false
+        });
+    }
+
+
+    /**
+     * 更新用户信息
+     * @param dto 
+     */
+    static async updateUserInfo(dto: UpdateUserInfoDto) {
+        const validationResult = updateUserInfoSchema.parse(dto);
+        const user = await prisma.user.findFirst({
+            where: {
+                id: validationResult.id
+            },
+        });
+        if (user) {
+            const newUser = await prisma.user.update({
+                data: {
+                    ...user,
+                    ...validationResult
+                },
+                where: {
+                    id: validationResult.id
+                }
+            });
+            return ServiceResponseJson({
+                data: {
+                    ...newUser,
+                    password: undefined
+                },
+                message: "更新成功",
+                success: true
+            });
+        }
+        return ServiceResponseJson({
+            data: null,
+            message: "用户ID错误",
+            success: true
         });
     }
 }

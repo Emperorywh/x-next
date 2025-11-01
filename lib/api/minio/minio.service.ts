@@ -18,7 +18,7 @@ export class MinIOService {
             return ServiceResponseJson({ data: null, message: 'objectName 必须传入', success: false })
         }
         const presignedUrl = await minioClient.presignedPutObject(minIOConfig.bucket as string, objectName, Number(expires))
-        return ServiceResponseJson({ data: { presignedUrl }, message: '上传URL生成成功', success: false })
+        return ServiceResponseJson({ data: { presignedUrl }, message: '上传URL生成成功', success: true })
     }
 
     /**
@@ -31,6 +31,6 @@ export class MinIOService {
             return ServiceResponseJson({ data: null, message: 'objectName 必须传入', success: false })
         }
         const presignedUrl = await minioClient.presignedGetObject(minIOConfig.bucket as string, objectName, Number(expires));
-        return ServiceResponseJson({ data: { presignedUrl }, message: '下载URL生成成功', success: false })
+        return ServiceResponseJson({ data: { presignedUrl }, message: '下载URL生成成功', success: true })
     }
 }
