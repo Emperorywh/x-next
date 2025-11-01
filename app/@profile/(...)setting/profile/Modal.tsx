@@ -151,6 +151,7 @@ export default function PostModal() {
                 setUserInfo(response.data)
                 setOpen(false);
                 router.back();
+                setTimeout(() => { router.refresh() }, 100)
             } else {
                 toast.error(response?.message);
             }
