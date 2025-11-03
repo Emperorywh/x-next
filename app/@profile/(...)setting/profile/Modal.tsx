@@ -68,25 +68,33 @@ export default function PostModal() {
     const onInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
         try {
             setLoading(true);
-            if (event.target.files?.length) {
-                const fileName = event.target.files?.[0].name;
-                const response = await uploadFileUrl({
-                    objectName: fileName
-                });
-                if (response.success && response.data?.presignedUrl) {
-                    await uploadFileToMinIO(event.target.files?.[0], response.data?.presignedUrl);
-                    const responsePreview = await getUploadResultUrl({ objectName: fileName });
-                    if (responsePreview.success && responsePreview?.data?.presignedUrl) {
-                        if (!userInfo) return;
-                        const presignedUrl = responsePreview?.data?.presignedUrl;
-                        const cloneUser = structuredClone(userInfo);
-                        if (uploadType.current === 'cover') {
-                            cloneUser.coverImage = presignedUrl;
-                        } else if (uploadType.current === 'image') {
-                            cloneUser.image = presignedUrl;
-                        }
-                        setUserInfo(cloneUser);
+            const fileList = event.target.files;
+            if (!fileList?.length) {
+                return;
+            }
+            const selectedFile = fileList[0];
+            if (!selectedFile.type?.startsWith('image/')) {
+                toast.error("请上传图片文件");
+                event.target.value = "";
+                return;
+            }
+            const fileName = selectedFile.name;
+            const response = await uploadFileUrl({
+                objectName: fileName
+            });
+            if (response.success && response.data?.presignedUrl) {
+                await uploadFileToMinIO(selectedFile, response.data?.presignedUrl);
+                const responsePreview = await getUploadResultUrl({ objectName: fileName });
+                if (responsePreview.success && responsePreview?.data?.presignedUrl) {
+                    if (!userInfo) return;
+                    const presignedUrl = responsePreview?.data?.presignedUrl;
+                    const cloneUser = structuredClone(userInfo);
+                    if (uploadType.current === 'cover') {
+                        cloneUser.coverImage = presignedUrl;
+                    } else if (uploadType.current === 'image') {
+                        cloneUser.image = presignedUrl;
                     }
+                    setUserInfo(cloneUser);
                 }
             }
         } catch (error) {
@@ -342,6 +350,7 @@ export default function PostModal() {
             )}
             <input
                 type="file"
+                accept="image/*"
                 style={{ display: 'none' }}
                 ref={inputRef}
                 onChange={onInputChange}
