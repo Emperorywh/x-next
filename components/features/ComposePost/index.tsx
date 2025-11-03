@@ -6,9 +6,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { AtSign, Check, ChevronDown, Earth, ImagePlus, ShieldCheck, Smile, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmojiPickerCustomer } from '../EmojiPickerCustomer';
-import { useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { createPostApi } from '@/lib/http/services/post';
+import { getUploadResultUrl, uploadFileUrl } from '@/lib/http/services/minio';
+import { uploadFile } from '@/lib/utils/uploadFile';
 
 /**
  * 撰写帖子
@@ -18,6 +20,57 @@ export function ComposePost(props: ComposePostProps) {
     const [postContent, setPostContent] = useState('');
     const [loading, setLoading] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const inputFileRef = useRef<HTMLInputElement>(null);
+
+    /**
+     * 选择文件
+     * @param event 
+     */
+    const onInputFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        try {
+            setLoading(true);
+            const fileList = event.target.files;
+            if (!fileList?.length) {
+                return;
+            }
+            const selectedFiles = Array.from(fileList);
+            const hasInvalidFile = selectedFiles.some(fileItem => {
+                const isImageFile = fileItem.type?.startsWith('image/');
+                const isVideoFile = fileItem.type?.startsWith('video/');
+                return !isImageFile && !isVideoFile;
+            });
+            if (hasInvalidFile) {
+                toast.error("仅支持上传图片或视频文件");
+                event.target.value = "";
+                return;
+            }
+            const presignedUrlArray: string[] = [];
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const currentFile = selectedFiles[i];
+                const response = await uploadFileUrl({
+                    objectName: currentFile.name
+                });
+                if (response.success && response?.data?.presignedUrl) {
+                    await uploadFile({
+                        url: response?.data?.presignedUrl,
+                        file: currentFile,
+                        method: 'PUT'
+                    });
+                    const responsePreview = await getUploadResultUrl({ objectName: currentFile.name });
+                    if (responsePreview.success && responsePreview?.data?.presignedUrl) {
+                        presignedUrlArray.push(responsePreview?.data?.presignedUrl);
+                    }
+                }
+            }
+            console.log("上传完成：", presignedUrlArray)
+            console.log(JSON.stringify(presignedUrlArray))
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const handlePost = async () => {
         try {
@@ -62,7 +115,7 @@ export function ComposePost(props: ComposePostProps) {
                         <ChevronDown style={{ color: '#1D9BF0' }} />
                     </div>
                 </PopoverTrigger>
-                <PopoverContent className="w-80">
+                <PopoverContent>
                     <div className="font-bold mb-2 text-xl">
                         <span>
                             选择受众
@@ -83,8 +136,8 @@ export function ComposePost(props: ComposePostProps) {
             </Popover>
             <Textarea
                 placeholder="有什么新鲜事？"
-                className="leading-[28px] focus-visible:ring-0 focus-visible:ring-offset-0 focus:shadow-none shadow-none border-0 outline-none resize-none bg-transparent font-bold w-full"
-                rows={1}
+                className="mb-3 leading-[28px] focus-visible:ring-0 focus-visible:ring-offset-0 focus:shadow-none shadow-none border-0 outline-none resize-none bg-transparent font-bold w-full"
+                rows={3}
                 value={postContent}
                 onChange={event => setPostContent(event.target.value)}
                 ref={textareaRef}
@@ -154,10 +207,10 @@ export function ComposePost(props: ComposePostProps) {
                     </div>
                 </PopoverContent>
             </Popover>
-            <hr className="border-t border-gray-300" />
-            <div className="mt-2 flex items-center justify-between">
+            <hr className="border-t border-gray-300 mb-5 mt-1" />
+            <div className="flex items-center justify-between">
                 <div className='flex gap-2'>
-                    <div className="w-[40px] h-[40px] hover:bg-[#e8f5fd] rounded-full flex items-center justify-center cursor-pointer">
+                    <div className="w-[40px] h-[40px] hover:bg-[#e8f5fd] rounded-full flex items-center justify-center cursor-pointer" onClick={() => inputFileRef?.current?.click()}>
                         <ImagePlus width={20} height={20} style={{ color: '#1D9BF0' }} />
                     </div>
                     <Popover>
@@ -187,5 +240,13 @@ export function ComposePost(props: ComposePostProps) {
                 </Button>
             </div>
         </div>
+        <input
+            type="file"
+            accept="image/*,video/*"
+            multiple
+            style={{ display: 'none' }}
+            ref={inputFileRef}
+            onChange={onInputFileChange}
+        />
     </div >
 }

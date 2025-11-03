@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import ModalSkeleton from "./ModalSkeleton";
 import { getUploadResultUrl, uploadFileUrl } from "@/lib/http/services/minio";
 import { toast } from "sonner";
+import { uploadFile } from "@/lib/utils/uploadFile";
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -83,7 +84,11 @@ export default function PostModal() {
                 objectName: fileName
             });
             if (response.success && response.data?.presignedUrl) {
-                await uploadFileToMinIO(selectedFile, response.data?.presignedUrl);
+                await uploadFile({
+                    url: response.data?.presignedUrl,
+                    file: selectedFile,
+                    method: 'PUT'
+                });
                 const responsePreview = await getUploadResultUrl({ objectName: fileName });
                 if (responsePreview.success && responsePreview?.data?.presignedUrl) {
                     if (!userInfo) return;
@@ -102,39 +107,6 @@ export default function PostModal() {
         } finally {
             setLoading(false);
         }
-    }
-
-    const uploadFileToMinIO = (file: any, presignedUrl: string, onProgress?: any) => {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-
-            // 监听上传进度
-            xhr.upload.addEventListener('progress', (e) => {
-                if (e.lengthComputable) {
-                    const percentComplete = (e.loaded / e.total) * 100;
-                    onProgress?.(percentComplete);
-                }
-            });
-
-            // 监听完成
-            xhr.addEventListener('load', () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve(xhr.response);
-                } else {
-                    reject(new Error(`上传失败: ${xhr.status} ${xhr.statusText}`));
-                }
-            });
-
-            // 监听错误
-            xhr.addEventListener('error', () => {
-                reject(new Error('上传过程中发生网络错误'));
-            });
-
-            // 发送请求
-            xhr.open('PUT', presignedUrl);
-            xhr.setRequestHeader('Content-Type', file.type);
-            xhr.send(file);
-        });
     }
 
     /**
