@@ -1,5 +1,4 @@
 import { Post } from "@/lib/api/post/post.types";
-import Image from 'next/image';
 import { useMemo } from "react";
 import { PostReply } from "../PostReply";
 import { PostForward } from "../PostForward";
@@ -7,6 +6,7 @@ import { PostViews } from "../PostViews";
 import { PostLike } from "../PostLike";
 import { PersonalInfomationHover } from "../PersonalInfomationHover";
 import Link from "next/link";
+import MinioImage from "../MinioImage";
 
 /**
  * 单个帖子组件
@@ -31,8 +31,8 @@ export const PostItem = ({ post }: { post: Post }) => {
     return (
         <div className="flex gap-2 border-b-1 p-4 hover:bg-gray-50 transition-colors cursor-pointer">
             <PersonalInfomationHover user={post.author}>
-                <Image
-                    src={post?.author?.image || ''}
+                <MinioImage
+                    objectName={post?.author?.image || ''}
                     alt={`${post.author.username} 头像`}
                     width={40}
                     height={40}

@@ -63,8 +63,6 @@ export function ComposePost(props: ComposePostProps) {
                     }
                 }
             }
-            console.log("上传完成：", presignedUrlArray)
-            console.log(JSON.stringify(presignedUrlArray))
         } catch (error) {
             console.log(error)
         } finally {
