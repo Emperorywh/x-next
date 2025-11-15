@@ -109,7 +109,6 @@ export const userGetInfoByUsername = withAuth(async (usernameDto: GetUserInfoUse
         // 验证路径参数
         const validationResult = getUserInfoByUsernameSchema.parse(usernameDto);
         const response = await UserService.getUserInfoByUsername(validationResult);
-        await sleep(2000);
         return ServiceResponseJson(response);
     } catch (error) {
         return ServiceResponseJson({
@@ -122,7 +121,7 @@ export const userGetInfoByUsername = withAuth(async (usernameDto: GetUserInfoUse
 });
 
 /**
- * 根据header信息查询用信息
+ * 根据header信息查询用户信息
  */
 export const userGetInfoByHeader = withAuth(async (): Promise<ApiResponse<User>> => {
     try {
@@ -151,8 +150,8 @@ export const userUpdateInfo = withAuth(async (dto: Omit<UpdateUserInfoDto, 'id'>
         const header = await headers();
         const userId = header.get("x-user-id");
         const response = await UserService.updateUserInfo({
+            ...dto,
             id: userId || '',
-            ...dto
         });
         await sleep(2000);
         return ServiceResponseJson(response);

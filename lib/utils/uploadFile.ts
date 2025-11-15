@@ -84,6 +84,17 @@ export function uploadFile(options: UploadOptions): Promise<any> {
     });
 }
 
+/**
+ * 生成ObjectName
+ * @param userId 
+ * @param fileExtension 
+ */
+export function generateMinIOObjectName(userId: string, fileExtension: string) {
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    return `${userId}/${timestamp}_${randomStr}.${fileExtension}`;
+}
+
 export interface UploadOptions {
     /**
      * 上传目标地址

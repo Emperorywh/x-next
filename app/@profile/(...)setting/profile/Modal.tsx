@@ -14,9 +14,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Input } from "@/components/ui/input";
 import ModalSkeleton from "./ModalSkeleton";
-import { getUploadResultUrl, uploadFileUrl } from "@/lib/http/services/minio";
+import { uploadFileUrl } from "@/lib/http/services/minio";
 import { toast } from "sonner";
-import { uploadFile } from "@/lib/utils/uploadFile";
+import { generateMinIOObjectName, uploadFile } from "@/lib/utils/uploadFile";
+import MinioImage from "@/components/features/MinioImage";
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -69,6 +70,10 @@ export default function PostModal() {
     const onInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
         try {
             setLoading(true);
+            if (!userInfo) {
+                toast.error("用户信息未找到");
+                return;
+            }
             const fileList = event.target.files;
             if (!fileList?.length) {
                 return;
@@ -79,9 +84,10 @@ export default function PostModal() {
                 event.target.value = "";
                 return;
             }
-            const fileName = selectedFile.name;
+            const fileExtension = selectedFile.name.split(".").splice(-1)[0];
+            const objectName = generateMinIOObjectName(userInfo.id, fileExtension);
             const response = await uploadFileUrl({
-                objectName: fileName
+                objectName: objectName
             });
             if (response.success && response.data?.presignedUrl) {
                 await uploadFile({
@@ -89,18 +95,13 @@ export default function PostModal() {
                     file: selectedFile,
                     method: 'PUT'
                 });
-                const responsePreview = await getUploadResultUrl({ objectName: fileName });
-                if (responsePreview.success && responsePreview?.data?.presignedUrl) {
-                    if (!userInfo) return;
-                    const presignedUrl = responsePreview?.data?.presignedUrl;
-                    const cloneUser = structuredClone(userInfo);
-                    if (uploadType.current === 'cover') {
-                        cloneUser.coverImage = presignedUrl;
-                    } else if (uploadType.current === 'image') {
-                        cloneUser.image = presignedUrl;
-                    }
-                    setUserInfo(cloneUser);
+                const cloneUser = structuredClone(userInfo);
+                if (uploadType.current === 'cover') {
+                    cloneUser.coverImage = objectName;
+                } else if (uploadType.current === 'image') {
+                    cloneUser.image = objectName;
                 }
+                setUserInfo(cloneUser);
             }
         } catch (error) {
             console.log(error)
@@ -201,8 +202,8 @@ export default function PostModal() {
                         userInfo && <div className="relative">
                             <div className="relative">
                                 <div className="relative">
-                                    <Image
-                                        src={userInfo?.coverImage || ''}
+                                    <MinioImage
+                                        objectName={userInfo?.coverImage || ''}
                                         alt="背景图片"
                                         width={599}
                                         height={199}
@@ -226,8 +227,8 @@ export default function PostModal() {
                                 </div>
                                 <div className="absolute top-[130px] left-[15px] p-[5px] rounded-full bg-[#FFF]">
                                     <div className="relative">
-                                        <Image
-                                            src={userInfo?.image || ''}
+                                        <MinioImage
+                                            objectName={userInfo?.image || ''}
                                             alt="头像"
                                             width={133}
                                             height={133}

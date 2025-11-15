@@ -13,7 +13,7 @@ export class MinIOService {
      * @returns 
      */
     static async presignUpload(presignUploadDto: PresignUploadDto) {
-        const { objectName, expires = 60 * 5 } = presignUploadDto;
+        const { objectName, expires } = presignUploadDto;
         if (!objectName) {
             return ServiceResponseJson({ data: null, message: 'objectName 必须传入', success: false })
         }
@@ -26,7 +26,7 @@ export class MinIOService {
      * @param presignDownloadDto 
      */
     static async presignDownload(presignDownloadDto: PresignDownloadDto) {
-        const { objectName, expires = 60 * 5 } = presignDownloadDto;
+        const { objectName, expires } = presignDownloadDto;
         if (!objectName) {
             return ServiceResponseJson({ data: null, message: 'objectName 必须传入', success: false })
         }

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import PageAsyncSkeleton from "./PageAsyncSkeleton";
+import MinioImage from "@/components/features/MinioImage";
 /**
  * 个人资料
  * @returns 
@@ -35,16 +36,16 @@ const PageAsync = async ({ params }: { params: Promise<{ username: string }>, se
                     <UsernameHeader user={response.data} />
                 </div>
                 <div className="relative mb-[50px]">
-                    <Image
-                        src={response?.data?.coverImage || ''}
+                    <MinioImage
+                        objectName={response?.data?.coverImage || ''}
                         alt="背景图片"
                         width={599}
                         height={199}
                         className="w-[599px] h-[199px]"
                     />
                     <div className="absolute top-[130px] left-[15px] p-[5px] rounded-full bg-[#FFF]">
-                        <Image
-                            src={response?.data?.image || ''}
+                        <MinioImage
+                            objectName={response?.data?.image || ''}
                             alt="头像"
                             width={133}
                             height={133}

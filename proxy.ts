@@ -1,6 +1,7 @@
 // proxy.ts
 import { NextRequest, NextResponse } from "next/server";
 import { JWTService } from "./lib/api/jwt/jwt.service";
+import { cookies } from "next/headers";
 
 export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -16,7 +17,7 @@ export async function proxy(request: NextRequest) {
     ];
 
     // 检查是否为公开路由
-    if (publicRoutes.some(route => pathname === route)) {
+    if (publicRoutes.some(route => pathname === route) || pathname.includes("/api/minio/getSource")) {
         return NextResponse.next();
     }
 
