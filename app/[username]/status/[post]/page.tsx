@@ -2,7 +2,6 @@ import { postGetById } from "@/app/actions/post/post.action";
 import NavigationBar from "@/components/features/NavigationBar";
 import { PersonalInfomationHover } from "@/components/features/PersonalInfomationHover";
 import Sidebar from "@/components/features/Sidebar";
-import Image from "next/image";
 import { PostDetailHeader } from "./PostDetailHeader";
 import { PostReply } from "@/components/features/PostReply";
 import { PostForward } from "@/components/features/PostForward";
@@ -11,6 +10,7 @@ import { PostViews } from "@/components/features/PostViews";
 import { Suspense } from "react";
 import { PostListSkeleton } from "@/components/features/PostList/PostListSkeleton";
 import { PostReplyList } from "@/components/features/PostReplyList";
+import MinioImage from "@/components/features/MinioImage";
 
 const AsyncPage = async ({ params }: { params: Promise<{ username: string, post: string }> }) => {
     try {
@@ -22,11 +22,11 @@ const AsyncPage = async ({ params }: { params: Promise<{ username: string, post:
         return <>
             <div className="flex items-center gap-3 mb-2">
                 <PersonalInfomationHover user={post.author}>
-                    <Image
+                    <MinioImage
                         width={40}
                         height={40}
                         alt={post.author.username}
-                        src={post.author.image || ''}
+                        objectName={post.author.image || ''}
                         className="rounded-full cursor-pointer w-[40px] h-[40px]"
                     />
                 </PersonalInfomationHover>

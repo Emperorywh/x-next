@@ -6,7 +6,6 @@ import { User } from "@/lib/api/user/user.types";
 import { ChevronRight, ImageUp, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";

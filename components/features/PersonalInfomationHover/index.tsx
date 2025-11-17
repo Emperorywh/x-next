@@ -1,8 +1,8 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { PersonalInfomationHoverProps } from "./types"
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { IconGork } from "../Icon";
+import MinioImage from "../MinioImage";
 
 /**
  * 个人资料
@@ -17,7 +17,7 @@ export const PersonalInfomationHover = (props: PersonalInfomationHoverProps) => 
         </HoverCardTrigger>
         <HoverCardContent className="w-[300px] h-[385px] px-5 py-3 rounded-xl box-border">
             <div className="flex items-start justify-between mb-3">
-                <Image className="rounded-full w-[64px] h-[64px]" width={64} height={64} src={user.image || ''} alt={user.username} />
+                <MinioImage className="rounded-full w-[64px] h-[64px]" width={64} height={64} objectName={user.image || ''} alt={user.username} />
                 <Button variant="outline" className="w-[94px] h-[36px] rounded-full flex items-center justify-center cursor-pointer">
                     正在关注
                 </Button>

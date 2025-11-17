@@ -3,7 +3,6 @@ import Sidebar from "@/components/features/Sidebar";
 import { UsernameHeader } from "./UsernameHeader";
 import { userGetInfoByUsername } from "../actions/user/user.action";
 import { Suspense } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { CalendarDays } from "lucide-react";
 import Link from "next/link";

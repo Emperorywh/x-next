@@ -1,7 +1,6 @@
 'use client';
 import { Textarea } from "@/components/ui/textarea";
 import { ReplyTextareaProps } from "./types";
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { ImagePlus, Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,6 +8,7 @@ import { EmojiPickerCustomer } from "../EmojiPickerCustomer";
 import { Button } from "@/components/ui/button";
 import { postReply } from "@/app/actions/post/post.action";
 import { toast } from "sonner";
+import MinioImage from "../MinioImage";
 
 export function ReplyTextarea(props: ReplyTextareaProps) {
 
@@ -47,8 +47,8 @@ export function ReplyTextarea(props: ReplyTextareaProps) {
 
     return <div className='flex'>
         <div className="mr-1 shrink-0">
-            <Image
-                src={loginUser?.image}
+            <MinioImage
+                objectName={loginUser?.image}
                 alt='头像'
                 width={40}
                 height={40}
