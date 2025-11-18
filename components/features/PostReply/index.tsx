@@ -1,10 +1,10 @@
 'use client';
-import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import { PostReplyProps } from "./types";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ReplyTextarea } from "./ReplyTextarea";
 import { useState } from "react";
+import MinioImage from "../MinioImage";
 
 /**
  * 回复帖子
@@ -44,12 +44,12 @@ export function PostReply(props: PostReplyProps) {
             <DialogDescription />
             <div className="flex gap-2">
                 <div className="shrink-0 flex flex-col items-center">
-                    <Image
-                        src={post?.author?.image || ''}
+                    <MinioImage
+                        objectName={post?.author?.image || ''}
                         alt={`${post.author.username} 头像`}
                         width={40}
                         height={40}
-                        className='rounded-full'
+                        className='rounded-full w-[40px] h-[40px]'
                     />
                     <div className="w-[2px] bg-[#cfd9de] grow"></div>
                 </div>

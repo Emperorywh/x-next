@@ -52,7 +52,7 @@ export function ReplyTextarea(props: ReplyTextareaProps) {
                 alt='头像'
                 width={40}
                 height={40}
-                className='rounded-full'
+                className='rounded-full w-[40px] h-[40px]'
             />
         </div>
         <div className="grow">

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LinkPersonal } from "../LinkPersonal";
 
 export default function NavigationBar() {
-    return <div className="grow shrink-0 overflow-hidden flex justify-end ">
+    return <div className="w-[32vw] shrink-0 overflow-hidden flex justify-end ">
         <div className="w-[275px] box-border">
             <Link href="/home">
                 <div className="w-[259px] cursor-pointer">
