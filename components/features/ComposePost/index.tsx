@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { createPostApi } from '@/lib/http/services/post';
 import { getUploadResultUrl, uploadFileUrl } from '@/lib/http/services/minio';
 import { uploadFile } from '@/lib/utils/uploadFile';
+import MinioImage from '../MinioImage';
+import { getLoginUserLocalStorageInfo } from '@/lib/utils/userOptions';
 
 /**
  * 撰写帖子
@@ -22,6 +24,8 @@ export function ComposePost(props: ComposePostProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const inputFileRef = useRef<HTMLInputElement>(null);
+
+    const loginUser = getLoginUserLocalStorageInfo();
 
     /**
      * 选择文件
@@ -97,8 +101,8 @@ export function ComposePost(props: ComposePostProps) {
 
     return <div className='flex'>
         <div className="mr-5 shrink-0">
-            <Image
-                src="https://pbs.twimg.com/profile_images/1979028593091956736/6ix-9yak_400x400.jpg"
+            <MinioImage
+                objectName={loginUser?.image || ""}
                 alt='头像'
                 width={40}
                 height={40}

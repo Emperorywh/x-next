@@ -40,6 +40,11 @@ interface EnvironmentVariables {
     MINIO_ACCESS_KEY: string;
     MINIO_SECRET_KEY: string;
     MINIO_BUCKET_NAME: string;
+
+    /**
+     * OpenAI API
+     */
+    OPENAI_API_KEY: string;
 }
 
 
@@ -121,6 +126,17 @@ class EnvironmentConfig {
             accessKey: this.validateEnvVar("MINIO_ACCESS_KEY"),
             secretKey: this.validateEnvVar("MINIO_SECRET_KEY"),
             bucket: this.validateEnvVar("MINIO_BUCKET_NAME")
+        }
+    }
+
+    /**
+     * ai相关配置
+     */
+    static get aiConfig() {
+        return {
+            openAi: {
+                apiKey: this.validateEnvVar("OPENAI_API_KEY")
+            }
         }
     }
 }

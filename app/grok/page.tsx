@@ -2,7 +2,9 @@
 import { IconGork } from "@/components/features/Icon";
 import NavigationBar from "@/components/features/NavigationBar";
 import { Textarea } from "@/components/ui/textarea";
-import { Maximize, History, Paperclip, MoveUp } from "lucide-react";
+import { aiChat } from "@/lib/http/services/ai";
+import { getLoginUserLocalStorageInfo } from "@/lib/utils/userOptions";
+import { Maximize, History, Paperclip, MoveUp, Loader } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -16,19 +18,52 @@ export default function Page() {
 
     const [messageList, setMessageList] = useState<{ id: string, message: string, fromType: 'ai' | 'user' }[]>([]);
 
-    const onSendMessage = () => {
-        if (!textareaRef?.current) return;
+    const [loading, setLoading] = useState(false);
+
+    const userInfo = getLoginUserLocalStorageInfo();
+
+    const onSendMessage = async () => {
+        if (!textareaRef?.current || !userInfo) return;
         const value = textareaRef.current?.value;
         if (!value) {
             toast.info("请输入内容");
             return;
         }
+        setLoading(true);
         setMessageList(prev => [...prev, {
             id: Date.now().toString(),
             message: value,
             fromType: 'user'
         }]);
         textareaRef.current.value = '';
+        const response = await fetch("/api/ai/chat", {
+            method: 'POST',
+            body: JSON.stringify({ message: value }),
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem("TOKEN")}`
+            }
+        });
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        const aiId = Math.random().toString(36).substring(2, 8);
+        setMessageList(prev => [...prev, {
+            id: aiId,
+            message: '',
+            fromType: 'ai'
+        }])
+        while (true) {
+            const { done, value } = await reader?.read();
+            if (done) {
+                break;
+            }
+            const findIndex = messageList.findIndex(item => item.id === aiId);
+            if (findIndex > -1) {
+                const cloneMessage = structuredClone(messageList);
+                cloneMessage[findIndex].message = cloneMessage[findIndex].message + decoder.decode(value);
+                setMessageList(cloneMessage);
+            }
+        }
+        setLoading(false);
     }
 
     return <div className="flex w-[100vw] h-[100vh] box-border overflow-hidden p-0 m-0">
@@ -55,7 +90,7 @@ export default function Page() {
                                     </div>
                                 } else {
                                     return <div key={item.id} className="flex justify-end">
-                                        <div className="bg-gray-200 p-5 rounded-2xl w-[50vw] mb-3">
+                                        <div className="bg-gray-200 px-5 py-3 rounded-2xl w-[50vw] mb-3">
                                             {item.message}
                                         </div>
                                     </div>
@@ -64,7 +99,7 @@ export default function Page() {
                         }
                     </div> : <div className="h-[40%]"></div>
                 }
-                <div className="shrink-0 flex flex-col items-center">
+                <div className="shrink-0 flex flex-col items-center pb-10">
                     <div className="flex items-center justify-center gap-2 h-[50px] cursor-pointer mb-2">
                         <IconGork width={36} height={36} />
                         <span className="font-bold text-2xl">Grok</span>
@@ -75,7 +110,9 @@ export default function Page() {
                         </div>
                         <Textarea ref={textareaRef} rows={1} className="border-none outline-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none resize-none max-h-[300px] w-[670px] min-h-0" placeholder="随便问点什么" />
                         <div onClick={onSendMessage} className="w-[33px] h-[33px] rounded-full bg-black flex items-center justify-center cursor-pointer  absolute bottom-3 right-3">
-                            <MoveUp className="text-[#FFF]" width={16} height={16} />
+                            {
+                                loading ? <Loader /> : <MoveUp className="text-[#FFF]" width={16} height={16} />
+                            }
                         </div>
                     </div>
                 </div>
